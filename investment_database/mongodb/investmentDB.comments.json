@@ -1,0 +1,486 @@
+[{
+  "_id": {
+    "$oid": "693447d4e66b06ecea63e8db"
+  },
+  "discussion_id": 101,
+  "asset_tag": "BTC",
+  "title": "GÜNCELLENDİ: Bitcoin 2025 Analizi",
+  "content": "Arkadaşlar grafikler yükselişi gösteriyor, sizce 100k doları geçer miyiz?",
+  "created_at": {
+    "$date": "2025-12-06T15:12:20.152Z"
+  },
+  "stats": {
+    "views": 1500,
+    "likes": 45
+  },
+  "author": {
+    "username": "kripto_uzmani",
+    "badge": "Analist"
+  },
+  "comments": [
+    {
+      "comment_id": 1,
+      "username": "acemi_yatirimci",
+      "text": "Hocam bence düşecek, ben sattım.",
+      "date": {
+        "$date": "2025-12-05T00:00:00.000Z"
+      },
+      "likes": 2,
+      "replies": [
+        {
+          "username": "kripto_uzmani",
+          "text": "Erken satmışsın, pişman olabilirsin.",
+          "date": {
+            "$date": "2025-12-06T00:00:00.000Z"
+          }
+        },
+        {
+          "username": "hodl_cu",
+          "text": "+1 Kesinlikle katılıyorum."
+        }
+      ]
+    },
+    {
+      "comment_id": 2,
+      "username": "zeynep_y",
+      "text": "Ben uzun vadeciyim, beklemeye devam.",
+      "likes": 12,
+      "replies": []
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447d4e66b06ecea63e8dc"
+  },
+  "discussion_id": 102,
+  "asset_tag": "USD",
+  "title": "Dolar/TL Kur Tahmini",
+  "content": "Fed faiz kararından sonra dolar ne olur?",
+  "created_at": {
+    "$date": "2025-12-06T15:12:20.152Z"
+  },
+  "author": {
+    "username": "ekonomi_prof",
+    "badge": "Yönetici"
+  },
+  "comments": []
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8de"
+  },
+  "discussion_id": 202,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #2",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.452Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8df"
+  },
+  "discussion_id": 203,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #3",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.454Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8e0"
+  },
+  "discussion_id": 204,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #4",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.455Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8e1"
+  },
+  "discussion_id": 205,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #5",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.456Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8e2"
+  },
+  "discussion_id": 206,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #6",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.457Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8e3"
+  },
+  "discussion_id": 207,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #7",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.458Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8e4"
+  },
+  "discussion_id": 208,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #8",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.459Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8e5"
+  },
+  "discussion_id": 209,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #9",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.460Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8e6"
+  },
+  "discussion_id": 210,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #10",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.462Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8e7"
+  },
+  "discussion_id": 211,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #11",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.463Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8e8"
+  },
+  "discussion_id": 212,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #12",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.464Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8e9"
+  },
+  "discussion_id": 213,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #13",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.466Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8ea"
+  },
+  "discussion_id": 214,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #14",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.467Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8eb"
+  },
+  "discussion_id": 215,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #15",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.468Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8ec"
+  },
+  "discussion_id": 216,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #16",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.469Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8ed"
+  },
+  "discussion_id": 217,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #17",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.470Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8ee"
+  },
+  "discussion_id": 218,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #18",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.471Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8ef"
+  },
+  "discussion_id": 219,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #19",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.472Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "693447eee66b06ecea63e8f0"
+  },
+  "discussion_id": 220,
+  "asset_tag": "GENEL",
+  "title": "Otomatik Oluşturulan Tartışma #20",
+  "content": "Bu konu sistem testi için oluşturulmuştur.",
+  "created_at": {
+    "$date": "2025-12-06T15:12:46.472Z"
+  },
+  "author": {
+    "username": "bot_user",
+    "badge": "Bot"
+  },
+  "comments": [
+    {
+      "username": "test_user",
+      "text": "İlk yorum benden!"
+    }
+  ]
+}]

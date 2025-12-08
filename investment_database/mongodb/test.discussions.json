@@ -1,0 +1,27 @@
+[{
+  "_id": {
+    "$oid": "69308b898a4a550fa5407ac3"
+  },
+  "topic_id": 1,
+  "asset_symbol": "BTC",
+  "title": "Bitcoin Yıl Sonu Tahmini",
+  "content": "Sizce 100k seviyesini görür mü?",
+  "author": {
+    "user_id_ref": 1,
+    "username": "kripto_krali"
+  },
+  "comments": [
+    {
+      "comment_id": 1,
+      "user_id_ref": 5,
+      "username": "acemi123",
+      "text": "Bence düşecek, alım için bekliyorum.",
+      "replies": [
+        {
+          "user_id_ref": 1,
+          "text": "Hangi verilere dayanarak?"
+        }
+      ]
+    }
+  ]
+}]
