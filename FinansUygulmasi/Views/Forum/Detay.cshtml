@@ -1,0 +1,199 @@
+﻿@model FinansUygulmasi.Models.ViewModels.KonuDetayViewModel
+
+@{
+    ViewData["Title"] = Model.Baslik;
+    Layout = "_Layout";
+}
+
+<style>
+    /* CSS kodların aynen korundu */
+    .forum-detail-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .btn-back {
+        display: inline-block;
+        margin-bottom: 1rem;
+        color: #9ca3af;
+        text-decoration: none;
+    }
+
+    /* Konu Kartı */
+    .topic-card {
+        background: rgba(255,255,255,0.05);
+        padding: 2rem;
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Yorum Kartı */
+    .comment-card {
+        background: rgba(0,0,0,0.2);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-radius: 0.8rem;
+        border: 1px solid rgba(255,255,255,0.05);
+        position: relative;
+    }
+
+    /* Alt Yanıtlar (Reply) Alanı */
+    .reply-container {
+        margin-top: 1rem;
+        margin-left: 2rem;
+        padding-left: 1rem;
+        border-left: 2px solid rgba(255,255,255,0.1);
+    }
+
+    .reply-card {
+        background: rgba(255,255,255,0.03);
+        padding: 0.8rem;
+        border-radius: 0.5rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    /* Silme Butonu */
+    .btn-delete {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: transparent;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        opacity: 0.6;
+    }
+
+        .btn-delete:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+    /* Form Stilleri */
+    .reply-box {
+        margin-top: 2rem;
+        background: rgba(255,255,255,0.05);
+        padding: 1.5rem;
+        border-radius: 1rem;
+    }
+
+    .reply-input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background: rgba(0,0,0,0.3);
+        color: white;
+        outline: none;
+    }
+
+        .reply-input:focus {
+            border-color: #facc15;
+        }
+
+    .btn-send {
+        margin-top: 10px;
+        background: #2563eb;
+        color: white;
+        padding: 8px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        float: right;
+    }
+</style>
+
+<div class="forum-detail-container">
+
+    @Html.ActionLink("← Konulara Dön", "Index", "Forum", null, new { @class = "btn-back" })
+
+    <div class="topic-card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h1 style="color:white; font-size:2rem; font-weight:bold; margin:0;">@Model.Baslik</h1>
+            <span style="background:#2563eb; color:white; padding:4px 10px; border-radius:5px; font-size:0.8rem;">@Model.YazarRozet</span>
+        </div>
+
+        <p style="color:#d1d5db; margin-top:1.5rem; line-height:1.6; font-size:1.1rem;">@Model.Icerik</p>
+
+        <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.1); color:#9ca3af; font-size:0.9rem; display:flex; gap:15px;">
+            <span>👤 @Model.YazarAdi</span>
+            <span>📅 @Model.Tarih</span>
+            <span>👁️ @Model.Goruntulenme</span>
+            <span>❤️ @Model.Begeni</span>
+        </div>
+    </div>
+
+    <div class="comments-section">
+        <h3 style="color:white; margin-bottom:1.5rem;">Yorumlar (@(Model.Yorumlar?.Count ?? 0))</h3>
+
+        @if (TempData["Hata"] != null)
+        {
+            <div style="color:red; margin-bottom:10px;">@TempData["Hata"]</div>
+        }
+
+        @if (Model.Yorumlar != null && Model.Yorumlar.Any())
+        {
+            foreach (var yorum in Model.Yorumlar)
+            {
+                <div class="comment-card">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                        <span style="color:#facc15; font-weight:bold;">@yorum.YazarAdi</span>
+                        <span style="color:#6b7280; font-size:0.8rem;">@yorum.Tarih</span>
+                    </div>
+
+                    <p style="color:#e5e7eb;">@yorum.Icerik</p>
+
+                    @if (ViewBag.CurrentUserId != null && yorum.YazarId == (int)ViewBag.CurrentUserId)
+                    {
+                        @using (Html.BeginForm("YorumSil", "Forum", FormMethod.Post))
+                        {
+                            // Gizli inputlar (Hidden)
+                            @Html.Hidden("konuId", Model.Id)
+                            @Html.Hidden("yorumId", yorum.CommentId)
+
+                            <button type="submit" class="btn-delete" title="Yorumu Sil" onclick="return confirm('Silmek istediğine emin misin?')">🗑️</button>
+                        }
+                    }
+
+                    @if (yorum.Yanitlar != null && yorum.Yanitlar.Any())
+                    {
+                        <div class="reply-container">
+                            @foreach (var yanit in yorum.Yanitlar)
+                            {
+                                <div class="reply-card">
+                                    <div style="display:flex; justify-content:space-between;">
+                                        <strong style="color:#60a5fa; font-size:0.85rem;">@yanit.YazarAdi</strong>
+                                        <span style="color:#6b7280; font-size:0.75rem;">@yanit.Tarih</span>
+                                    </div>
+                                    <p style="color:#d1d5db; margin-top:4px;">@yanit.Icerik</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <p style="color:gray; font-style:italic;">Henüz yorum yapılmamış.</p>
+        }
+    </div>
+
+    <div class="reply-box">
+        @using (Html.BeginForm("CevapYaz", "Forum", FormMethod.Post))
+        {
+            @Html.Hidden("id", Model.Id)
+
+            <label style="color:#d1d5db; font-weight:bold; display:block; margin-bottom:10px;">Cevap Yaz</label>
+
+            // TextBox Helper'ı kullandık, HTML attribute'ları object olarak verdik
+            @Html.TextBox("mesaj", null, new { @class = "reply-input", placeholder = "Düşüncelerini paylaş...", autocomplete = "off", required = "required" })
+
+            <button type="submit" class="btn-send">Gönder</button>
+            <div style="clear:both;"></div>
+        }
+    </div>
+</div>

@@ -1,0 +1,174 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Finans AI</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* --- ORJİNAL ARKA PLANINIZ --- */
+        body {
+            background-color: #0f0c29;
+            background-image: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+            background-attachment: fixed;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- SADE NAVBAR --- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            min-height: 80px;
+            background: rgba(255, 255, 255, 0.03); /* Cam Efekti */
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* 1. SOL: LOGO (Ana Sayfaya Gider) */
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffd700; /* Altın Sarısı */
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.3s;
+        }
+
+            .nav-logo:hover {
+                opacity: 0.8;
+            }
+
+        /* 2. ORTA: SOHBET BUTONU */
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .chat-btn {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 8px 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+            .chat-btn:hover {
+                background: rgba(255, 255, 255, 0.15);
+                color: #fff;
+                transform: translateY(-2px);
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+            }
+
+        /* 3. SAĞ: ÇIKIŞ BUTONU */
+        .btn-cikis {
+            color: #ff6b6b;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            padding: 8px 20px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+            .btn-cikis:hover {
+                background: #ff6b6b;
+                color: #fff;
+                box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+            }
+
+        /* İçerik Alanı */
+        .main-content {
+            flex: 1;
+            padding: 40px 5%;
+            width: 100%;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #888;
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.2);
+            margin-top: auto;
+        }
+
+        /* Mobil Uyum */
+        @@media screen and (max-width: 768px) {
+            .nav-center
+
+        {
+            position: static;
+            transform: none;
+            margin: 10px 0;
+        }
+
+        .navbar {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="@Url.Action("Index", "Home")" class="nav-logo">
+            <i class="fa-solid fa-robot"></i> Finans AI
+        </a>
+
+        <div class="nav-center">
+            <a href="@Url.Action("Index", "Forum")" class="chat-btn">
+                <i class="fa-regular fa-comments"></i> Sohbet
+            </a>
+        </div>
+
+        <div>
+            @Html.ActionLink("Çıkış Yap", "Cikis", "Acilis", null, new { @class = "btn-cikis" })
+        </div>
+    </nav>
+
+    <div class="main-content">
+        @RenderBody()
+    </div>
+
+    <footer>
+        &copy; 2025 Finans AI - Tüm Hakları Saklıdır.
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,188 @@
+﻿@using FinansUygulmasi.Models.ViewModels
+@model SifremiUnuttumViewModel
+
+@{
+    Layout = null;
+
+    var ikonlar = new List<string> {
+        "fa-solid fa-bitcoin-sign", "fa-brands fa-ethereum", "fa-solid fa-litecoin-sign",
+        "fa-solid fa-dollar-sign", "fa-solid fa-euro-sign", "fa-solid fa-coins",
+        "fa-solid fa-robot", "fa-solid fa-network-wired", "fa-solid fa-chart-line",
+        "fa-solid fa-shield-halved"
+    };
+    var rnd = new Random();
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şifremi Unuttum</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap">
+
+    <style>
+        *{
+        margin:0;
+        padding:0;
+        box-sizing: border-box;
+        font-family:'Popins', sans-serif;
+        }
+
+        body{
+        background-color: #0f0c29;
+        background-image: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+        }
+
+        .kutu-paneli {
+        position: relative;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 50px 40px;
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        .kutu-paneli h2 {
+        margin-bottom: 10px;
+        color: #fff;
+        font-size: 1.8rem;
+        }
+
+        .kutu-paneli p {
+        color: #aaa;
+        font-size: 0.9rem;
+        margin-bottom: 30px;
+        line-height: 1.5;
+        }
+
+        .ozel-input {
+        width: 100%;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 30px;
+        color: #fff;
+        outline: none;
+        margin-bottom: 20px;
+        transition: 0.3s;
+        font-size: 1rem;
+        text-align: center;
+        }
+
+        .ozel-input:focus {
+        border-color: #ffd700;
+        background: rgba(0, 0, 0, 0.5);
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-gonder {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(45deg, #ffd700, #ff8c00);
+        border: none;
+        border-radius: 30px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        color: #000;
+        transition: transform 0.2s;
+        margin-top: 10px;
+        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-gonder:hover {
+        transform: scale(1.05);
+        }
+
+        .geri-don {
+        margin-top: 20px;
+        display: block;
+        color: #ccc;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: 0.3s;
+        }
+
+        .geri-don:hover {
+        color: #fff;
+        }
+
+        .basari-kutusu {
+            color: #2ecc71;
+            background: rgba(46, 204, 113, 0.1);
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        /*mobilde bozulmaması için*/
+        @@media screen and (max-width: 600px) {
+        .kutu-paneli{
+        padding: 30px 20px;
+        }
+
+        .kutu-paneli h2 {
+        font-size: 1.5rem;
+        }
+
+        .ucan-simge {
+        font-size: 1.5rem !important;
+        }
+
+        }
+
+    </style>
+</head>
+<body>
+
+    @await Html.PartialAsync("_ArkaPlan")
+
+    <div class="arka-plan-izgara"></div>
+
+    <div class=" kutu-paneli">
+        <i class=" fa-solid fa-lock-open" style="font-size: 3rem; color: #ffd700; margin-bottom: 20px;"></i>
+        <h2>Şifremi Sıfırla</h2>
+        <p>Kayıtlı olduğun hesabın e-posta adresini gir. Sana sıfırlama kodu göndereceğiz</p>
+
+        @using (Html.BeginForm("SifremiUnuttum", "Acilis", FormMethod.Post))
+        {
+            @Html.TextBoxFor(m=>m.Email, new {@class="ozel-input", placeholder="E-posta adresiniz"})            
+            @Html.ValidationMessageFor(m=>m.Email)
+
+            <button type="submit" class="btn-gonder">Kod Gönder</button>
+        }
+
+        @if (TempData["BasariMesaji"] != null)
+        {
+            <div class="basari-kutusu">
+                <i class="fa-solid fa0check-circle"></i> @TempData["BasariMesaji"]
+            </div>
+        }
+        
+        @if (ViewBag.Hata != null)
+        {
+            <div class="hata-kutusu">...</div>
+        }
+
+        <a href="@Url.Action("Giris", "Acilis")" class="geri-don">
+            <i class="fa-solid fa-arrow-left"></i>Giriş Ekranına Dön
+        </a>
+    </div>
+</body>
+</html>

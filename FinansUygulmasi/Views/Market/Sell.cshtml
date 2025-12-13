@@ -1,0 +1,226 @@
+﻿@model FinansUygulmasi.Models.ViewModels.TradeViewModel
+
+@{
+    Layout = "_Layout";
+    string symbol = Model.Symbol;
+    decimal fiyat = Model.CurrentPrice;
+}
+
+<style>
+    .sell-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+    }
+
+    .sell-card {
+        width: 100%;
+        max-width: 28rem;
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .bg-blur-red {
+        position: absolute;
+        top: -2.5rem;
+        right: -2.5rem;
+        width: 10rem;
+        height: 10rem;
+        background-color: #dc2626;
+        border-radius: 9999px;
+        filter: blur(64px);
+        opacity: 0.2;
+        pointer-events: none;
+    }
+
+    .header-area {
+        text-align: center;
+        margin-bottom: 2rem;
+        position: relative;
+        z-index: 10;
+    }
+
+    .icon-wrapper {
+        width: 4rem;
+        height: 4rem;
+        background-color: rgba(239, 68, 68, 0.2);
+        border-radius: 9999px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem auto;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .sell-title {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.25rem;
+    }
+
+    .text-red {
+        color: #ef4444;
+    }
+
+    .sell-subtitle {
+        font-size: 0.875rem;
+        color: #9ca3af;
+        margin-top: 0.25rem;
+    }
+
+    .font-mono {
+        font-family: monospace;
+        font-weight: 700;
+        color: white;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .input-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #d1d5db;
+        margin-bottom: 0.5rem;
+        margin-left: 0.25rem;
+    }
+
+    .sell-input-wrapper {
+        position: relative;
+    }
+
+    .sell-input {
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        color: white;
+        font-family: monospace;
+        font-size: 1.25rem;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+        .sell-input:focus {
+            border-color: #ef4444;
+        }
+
+    .suffix-text {
+        position: absolute;
+        right: 1rem;
+        top: 1rem;
+        font-weight: 700;
+        color: #6b7280;
+    }
+
+    .summary-box {
+        background-color: rgba(239, 68, 68, 0.1);
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .summary-label {
+        color: #fecaca;
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .summary-value {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: white;
+        font-family: monospace;
+    }
+
+    .btn-sell-confirm {
+        width: 100%;
+        background: linear-gradient(to right, #dc2626, #ef4444);
+        color: white;
+        font-weight: 700;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.3);
+        transition: transform 0.2s;
+    }
+
+        .btn-sell-confirm:hover {
+            background: linear-gradient(to right, #ef4444, #f87171);
+            transform: translateY(-2px);
+        }
+</style>
+
+<div class="sell-container">
+    <div class="sell-card">
+
+        <div class="bg-blur-red"></div>
+
+        <div class="header-area">
+            <div class="icon-wrapper">
+                <i class="fas fa-arrow-down" style="font-size: 1.5rem; color: #f87171;"></i>
+            </div>
+            <h2 class="sell-title">@Model.Symbol <span class="text-red">BOZDUR</span></h2>
+            <p class="sell-subtitle">Satış Kuru: <span class="font-mono">@Model.CurrentPrice.ToString("N2") ₺</span></p>
+        </div>
+
+        @using (Html.BeginForm("IslemTamamla", "Market", FormMethod.Post, new { style = "position: relative; z-index: 10; display: flex; flex-direction: column; gap: 1.5rem;" }))
+        {
+            @Html.HiddenFor(m=>m.Symbol)
+            @Html.Hidden("islemTuru", "Satis")
+
+            <div>
+                <label class="input-label">Satılacak Miktar</label>
+                <div class="sell-input-wrapper">
+                    @Html.TextBoxFor(m=>m.Amount, new
+                        {
+                            @class = "sell-input",
+                            type = "number",
+                            step = "any",
+                            id = "miktar",
+                            placeholder = "0.00",
+                            required = "required",
+                            oninput = "hesapla()"
+                        })
+                    <span class="suffix-text">@Model.Symbol</span>
+                </div>
+            </div>
+
+            <div class="summary-box">
+                <span class="summary-label">Hesabına Geçecek Tutar</span>
+                <span class="summary-value" id="toplam">0,00 ₺</span>
+            </div>
+
+            <button type="submit" class="btn-sell-confirm">
+                SATIŞI ONAYLA
+            </button>
+        }
+    </div>
+</div>
+
+<script>
+    function hesapla() {
+        const miktar = document.getElementById('miktar').value.replace(',', '.');
+        const fiyat = @Model.CurrentPrice.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        const toplam = miktar * fiyat;
+        document.getElementById('toplam').innerText =
+            new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(toplam);
+    }
+</script>

@@ -1,0 +1,188 @@
+﻿@model FinansUygulmasi.Models.ViewModels.TradeViewModel
+
+@{
+    Layout = "_Layout";
+    string symbol = Model.Symbol;
+    decimal fiyat = Model.CurrentPrice;
+    decimal bakiye = Model.WalletBalance;
+}
+
+<style>
+    /* ... (Senin önceki CSS kodların buraya gelecek: page-container, buy-card vb.) ... */
+
+    .page-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        padding: 2.5rem 0;
+    }
+
+    .buy-card {
+        width: 100%;
+        max-width: 64rem;
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    @@media(min - width: 768px)
+
+    {
+        .buy-card
+
+    {
+        flex-direction: row;
+    }
+
+    }
+
+    .left-panel {
+        width: 100%;
+        padding: 2rem;
+        background: linear-gradient(to bottom right, rgba(20, 83, 45, 0.4), rgba(0, 0, 0, 0.4));
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    @@media(min - width: 768px)
+
+    {
+        .left-panel
+
+    {
+        width: 50%;
+    }
+
+    }
+
+    .right-panel {
+        width: 100%;
+        padding: 2rem;
+        background-color: rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    @@media(min - width: 768px)
+
+    {
+        .right-panel
+
+    {
+        width: 50%;
+    }
+
+    }
+
+    .input-field {
+        width: 100%;
+        background: rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.1);
+        padding: 1rem;
+        color: white;
+        font-size: 1.25rem;
+        border-radius: 0.75rem;
+    }
+
+    .btn-submit {
+        width: 100%;
+        margin-top: 2rem;
+        background: linear-gradient(to right, #16a34a, #22c55e);
+        color: white;
+        font-weight: 700;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* Yeni Wallet Box Stili */
+    .wallet-box {
+        background: rgba(255,255,255,0.05);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        margin-bottom: 2rem;
+    }
+
+    .wallet-label {
+        color: #9ca3af;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+    }
+
+    .wallet-amount {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        font-family: monospace;
+    }
+
+    .deposit-link {
+        color: #818cf8;
+        text-decoration: none;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: inline-block;
+    }
+</style>
+
+<div class="page-container">
+    @using (Html.BeginForm("IslemTamamla", "Market", FormMethod.Post, new { @class = "buy-card" }))
+    {
+        @Html.HiddenFor(m=>m.Symbol)
+        @Html.Hidden("islemTuru", "Alis")
+
+        <div class="left-panel">
+            <h2 style="color:white; font-size: 1.8rem; font-weight: 700; margin-bottom: 0;">@Model.Symbol SATIN AL</h2>
+            <p style="color:#9ca3af; margin-bottom: 2rem;">Kur: @Model.CurrentPrice.ToString("N2") ₺</p>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label style="color:#d1d5db; display:block; margin-bottom:0.5rem;">Alınacak Miktar</label>
+                @Html.TextBoxFor(m=>m.Amount, new
+                    {
+                        @class = "input-field",
+                        type = "number",
+                        step = "any",
+                        id = "miktar",
+                        required = "required",
+                        oninput = "hesapla()",
+                        placeholder = "0.00"
+                    })
+            </div>
+        </div>
+
+        <div class="right-panel">
+
+            <div class="wallet-box">
+                <p class="wallet-label">Mevcut Cüzdan Bakiyesi</p>
+                <p class="wallet-amount">@Model.WalletBalance.ToString("N2") ₺</p>
+
+                <a href="@Url.Action("Deposit", "Cuzdan")" class="deposit-link">
+                    <i class="fas fa-plus-circle"></i> Bakiye Yükle
+                </a>
+            </div>
+
+            <p style="color: #9ca3af; font-size: 0.9rem; line-height: 1.5;">
+                Bu işlem tutarı doğrudan cüzdan bakiyenizden düşülecektir.
+                Yetersiz bakiye durumunda işlem gerçekleşmez.
+            </p>
+
+            <button type="submit" class="btn-submit">
+                SATIN ALMAYI ONAYLA
+            </button>
+        </div>
+    }
+</div>
+
+<script>
+    function hesapla() {
+        const miktar = document.getElementById('miktar').value.replace(',', '.');
+        const fiyat = @Model.CurrentPrice.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        const toplam = miktar * fiyat;
+        document.getElementById('toplam').innerText =
+            new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(toplam);
+    }
+</script>

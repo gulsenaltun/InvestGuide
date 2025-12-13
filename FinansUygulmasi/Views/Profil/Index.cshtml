@@ -1,0 +1,408 @@
+﻿@model FinansUygulmasi.Models.ViewModels.ProfilViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Profilim ve Varlıklarım";
+}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    /* --- CSS SIFIRLAMA VE TEMEL AYARLAR --- */
+    .profile-container {
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        box-sizing: border-box;
+    }
+
+    /* CAM PANEL (ORTAK TASARIM) */
+    .glass-panel {
+        background-color: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1.25rem;
+        padding: 1.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    /* --- ÜST KISIM: PROFİL BAŞLIĞI --- */
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        padding: 2rem;
+    }
+
+    .avatar-circle {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .user-info h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+    }
+
+    .user-info p {
+        color: #9ca3af;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    .header-right {
+        margin-left: auto;
+        text-align: right;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .stat-value-lg {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #4ade80;
+        font-family: monospace;
+    }
+
+
+    /* --- !!! DÜZELTİLEN KISIM: IZGARA YAPISI !!! --- */
+    .dashboard-grid {
+        display: grid;
+        gap: 1.5rem;
+        /* Varsayılan (Mobil): Tek sütun */
+        grid-template-columns: 1fr;
+    }
+
+    /* Tablet ve Üstü (768px): Yan yana zorla */
+    @@media (min-width: 768px) {
+        .dashboard-grid
+
+    {
+        /* SOL (2 birim) - SAĞ (1 birim) */
+        grid-template-columns: 2fr 1fr;
+        align-items: start; /* Yukarı hizala */
+    }
+
+    }
+
+
+    /* --- SOL TARAFTAKİLER (Cüzdan + Tablo) --- */
+    .left-side {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem; /* Cüzdan ile Tablo arasındaki boşluk */
+    }
+
+    /* Cüzdan Kutusu */
+    .wallet-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(to right, rgba(6, 78, 59, 0.4), transparent);
+        border: 1px solid rgba(52, 211, 153, 0.2);
+    }
+
+    .wallet-val {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: white;
+        font-family: monospace;
+        margin: 0;
+    }
+
+    .btn-add-funds {
+        background: rgba(255,255,255,0.1);
+        color: white;
+        text-decoration: none;
+        padding: 0.6rem 1.2rem;
+        border-radius: 0.6rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        transition: 0.2s;
+        white-space: nowrap;
+    }
+
+        .btn-add-funds:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+    /* Tablo Stilleri */
+    .table-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .asset-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 0.5rem;
+    }
+
+        .asset-table th {
+            text-align: left;
+            color: #9ca3af;
+            font-size: 0.75rem;
+            padding: 0.5rem 1rem;
+            text-transform: uppercase;
+        }
+
+        .asset-table td {
+            padding: 1rem;
+            background: rgba(255,255,255,0.03);
+            color: white;
+            vertical-align: middle;
+        }
+
+        .asset-table tr td:first-child {
+            border-top-left-radius: 0.75rem;
+            border-bottom-left-radius: 0.75rem;
+        }
+
+        .asset-table tr td:last-child {
+            border-top-right-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+        }
+
+    .coin-flex {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .coin-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: black;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .coin-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .coin-symbol {
+        font-weight: 700;
+        font-size: 0.9rem;
+        line-height: 1.2;
+    }
+
+    .coin-name {
+        font-size: 0.75rem;
+        color: #9ca3af;
+    }
+
+    .font-mono {
+        font-family: monospace;
+    }
+
+    /* Yüzdelik Çubuk */
+    .progress-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .progress-text {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        font-weight: 600;
+        min-width: 35px;
+        text-align: right;
+    }
+
+    .progress-track {
+        flex: 1;
+        height: 6px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 3px;
+    }
+
+
+    /* --- SAĞ TARAFTAKİLER (Grafik) --- */
+    .right-side {
+        height: 100%; /* Sol tarafın yüksekliğine uyum sağla */
+    }
+
+    .chart-panel {
+        height: 100%;
+        min-height: 450px; /* Grafik panelinin minimum boyu */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chart-wrapper {
+        width: 100%;
+        max-width: 280px; /* Grafiğin çok büyümesini engelle */
+        position: relative;
+    }
+
+    .chart-footer {
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+</style>
+
+<div class="profile-container">
+
+    <div class="glass-panel profile-header">
+        <div class="avatar-circle"><i class="fas fa-user"></i></div>
+        <div class="user-info">
+            <h1>@Model.Username</h1>
+            <p>@Model.Email</p>
+            <span class="role-badge">@Model.Role Üyelik</span>
+        </div>
+        <div class="header-right">
+            <p class="stat-label">Toplam Varlık</p>
+            <p class="stat-value-lg">@Model.GenelToplam.ToString("C2")</p>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+
+        <div class="left-side">
+
+            <div class="glass-panel wallet-card">
+                <div>
+                    <p class="stat-label" style="margin-bottom: 5px;"><i class="fas fa-wallet" style="margin-right:5px;"></i> Nakit Cüzdan</p>
+                    <p class="wallet-val">@Model.NakitBakiye.ToString("C2")</p>
+                </div>
+                <a href="@Url.Action("Deposit", "Cuzdan", new { id = Model.UserId })" class="btn-add-funds">
+                    <i class="fas fa-plus"></i> Para Yükle
+                </a>
+            </div>
+
+            <div class="glass-panel">
+                <h3 class="table-title">Portföy Dağılımı</h3>
+                <div class="table-container">
+                    <table class="asset-table">
+                        <thead>
+                            <tr>
+                                <th>Varlık</th>
+                                <th>Miktar</th>
+                                <th>Değer</th>
+                                <th>Oran</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Varliklar)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="coin-flex">
+                                            <div class="coin-icon" style="background-color: @item.RenkKod">
+                                                <i class="fas @(item.Symbol=="BTC"?"fa-bitcoin":item.Symbol=="GOLD"?"fa-coins":item.Symbol=="USD"?"fa-dollar-sign":"fa-euro-sign")"></i>
+                                            </div>
+                                            <div class="coin-info">
+                                                <span class="coin-symbol">@item.Symbol</span>
+                                                <span class="coin-name">@item.Name</span>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td class="font-mono" style="color:#d1d5db;">@item.Miktar</td>
+
+                                    <td class="font-mono" style="font-weight:700;">@item.ToplamDeger.ToString("N0") ₺</td>
+
+                                    <td style="width: 35%;">
+                                        <div class="progress-row">
+                                            <span class="progress-text">@item.Yuzde.ToString("N0")%</span>
+                                            <div class="progress-track">
+                                                <div class="progress-fill" style="width: @item.Yuzde%; background-color: @item.RenkKod"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="right-side">
+            <div class="glass-panel chart-panel">
+                <h3 class="table-title" style="text-align:center;">Varlık Grafiği</h3>
+
+                <div class="chart-wrapper">
+                    <canvas id="portfolioChart"></canvas>
+                </div>
+
+                <div class="chart-footer">
+                    <p class="stat-label">Yatırım Değeri</p>
+                    <p class="stat-value-lg" style="color:white; font-size:1.5rem;">@Model.ToplamVarlikDegeri.ToString("C2")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('portfolioChart').getContext('2d');
+
+    const labels = @Html.Raw(Json.Serialize(Model.Varliklar.Select(x => x.Name)));
+    const data = @Html.Raw(Json.Serialize(Model.Varliklar.Select(x => x.ToplamDeger)));
+    const colors = @Html.Raw(Json.Serialize(Model.Varliklar.Select(x => x.RenkKod)));
+
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: colors,
+                borderWidth: 0,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { color: '#9ca3af', padding: 20, font: { family: 'sans-serif' } }
+                }
+            },
+            cutout: '75%'
+        }
+    });
+</script>

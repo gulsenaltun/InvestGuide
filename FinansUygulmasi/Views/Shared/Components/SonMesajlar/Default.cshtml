@@ -1,0 +1,162 @@
+﻿@model List<FinansUygulmasi.Models.ViewModels.MesajViewModel>
+
+<style>
+    .message-box {
+        background-color: rgba(255,255,255,0.1);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        height: 100%; /* Yükseklik ayarı */
+        min-height: 400px; /* İçerik az olsa bile kutu düzgün dursun */
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        color: white;
+    }
+
+    .msg-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        padding-bottom: 1rem;
+    }
+
+    .msg-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+    }
+
+    .msg-icon {
+        color: #818cf8;
+    }
+
+    .live-badge {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        background-color: rgba(0,0,0,0.2);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+    }
+
+    .msg-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .msg-item {
+        display: flex;
+        gap: 1rem;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        transition: all 0.3s ease;
+        background-color: transparent;
+        border: 1px solid transparent; /* Hover zıplamasını engeller */
+    }
+
+        .msg-item:hover {
+            background-color: rgba(255,255,255,0.05);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+    .avatar-circle {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        background: linear-gradient(to top right, #6366f1, #a855f7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        flex-shrink: 0;
+    }
+
+    .msg-content {
+        flex: 1;
+        overflow: hidden; /* Taşmayı engeller */
+    }
+
+    .msg-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.25rem;
+    }
+
+    .user-name {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: #c7d2fe;
+        margin: 0;
+    }
+
+    .time-stamp {
+        font-size: 0.75rem;
+        color: #9ca3af;
+    }
+
+    .topic-title {
+        color: #6366f1;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+
+    .msg-text {
+        font-size: 0.85rem;
+        color: #e5e7eb;
+        margin: 0;
+        line-height: 1.4;
+    }
+</style>
+
+<div class="message-box">
+    <div class="msg-header">
+        <h3 class="msg-title">
+            <i class="fas fa-comments msg-icon"></i> Son Mesajlar
+        </h3>
+        <span class="live-badge">Canlı</span>
+    </div>
+
+    <div class="msg-list">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var msj in Model)
+            {
+                <div class="msg-item">
+                    <div class="avatar-circle">
+                        @msj.AvatarUrl
+                    </div>
+
+                    <div class="msg-content">
+                        <div class="msg-meta">
+                            <h5 class="user-name">@msj.KullaniciAdi</h5>
+                            <span class="time-stamp">@msj.TarihFormatli</span>
+                        </div>
+
+                        <span class="topic-title">@msj.KonuBasligi</span>
+
+                        <p class="msg-text">
+                            @msj.Icerik
+                        </p>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="msg-item" style="justify-content:center; padding: 2rem 0;">
+                <p class="msg-text" style="color:#9ca3af;">Henüz hiç yorum yapılmamış.</p>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,267 @@
+﻿@model List<FinansUygulmasi.Models.Entities.User>
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Admin Paneli";
+}
+
+<style>
+    /* Genel Admin Konteyner */
+    .admin-container {
+        padding: 2rem;
+        color: white;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Başlık ve Buton Alanı */
+    .admin-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    /* Market Durum Butonları */
+    .btn-market {
+        padding: 10px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: white;
+        font-weight: 600;
+        transition: transform 0.2s, box-shadow 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .btn-market:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            color: white; /* Hover'da renk değişmesin */
+        }
+
+    .btn-close {
+        background: linear-gradient(45deg, #ff416c, #ff4b2b);
+    }
+
+    .btn-open {
+        background: linear-gradient(45deg, #00b09b, #96c93d);
+    }
+
+    /* İstatistik Kartları Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 25px;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        text-align: center;
+    }
+
+        .stat-card h3 {
+            font-size: 1rem;
+            color: #cbd5e1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-card h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+    /* Arama Formu */
+    .search-form {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 10px;
+        border-radius: 15px;
+        width: fit-content;
+    }
+
+    .search-input {
+        padding: 10px 15px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        width: 300px;
+        background: rgba(0, 0, 0, 0.2);
+        color: white;
+        outline: none;
+    }
+
+    .search-btn {
+        background: #6366f1;
+        color: white;
+        border: none;
+        padding: 10px 25px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.3s;
+    }
+
+        .search-btn:hover {
+            background: #4f46e5;
+        }
+
+    /* Tablo Tasarımı */
+    .admin-table {
+        width: 100%;
+        text-align: left;
+        border-collapse: separate;
+        border-spacing: 0 8px; /* Satırlar arası boşluk */
+    }
+
+        .admin-table th {
+            padding: 15px;
+            color: #94a3b8;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-table td {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .admin-table tr td:first-child {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        .admin-table tr td:last-child {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+    .action-delete {
+        color: #ff6b6b;
+        text-decoration: none;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 5px;
+        transition: background 0.2s;
+    }
+
+        .action-delete:hover {
+            background: rgba(255, 107, 107, 0.1);
+        }
+
+    .action-edit {
+        color: #facc15; /* Sarı renk */
+        text-decoration: none;
+        font-weight: 600;
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin-right: 5px;
+        transition: background 0.2s;
+    }
+
+        .action-edit:hover {
+            background: rgba(250, 204, 21, 0.1);
+        }
+</style>
+<div class="admin-container">
+
+    <div class="admin-header">
+        <h2 class="gradient-title">👑 Yönetici Paneli</h2>
+
+        @if (ViewBag.MarketDurumu == "Açık")
+        {
+            @Html.ActionLink("⛔ Market Erişimini Kapat", "MarketDurumunuDegistir", "Admin", null, new { @class = "btn-market btn-close" })
+        }
+        else
+        {
+            @Html.ActionLink("✅ Market Erişimini Aç", "MarketDurumunuDegistir", "Admin", null, new { @class = "btn-market btn-open" })
+        }
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>👥 Toplam Üye</h3>
+            <h1>@ViewBag.ToplamKullanici</h1>
+        </div>
+        <div class="stat-card">
+            <h3>📊 Piyasa Durumu</h3>
+            <h1>@ViewBag.MarketDurumu</h1>
+        </div>
+    </div>
+
+    @using (Html.BeginForm("Index", "Admin", FormMethod.Get, new { @class = "search-form" }))
+    {
+        // ViewBag.CurrentSearch sayesinde arama sonrası yazı inputta kalır
+        @Html.TextBox("search", (string)ViewBag.CurrentSearch, new { @class = "search-input", placeholder = "Kullanıcı adı veya email ara..." })
+
+        <button type="submit" class="search-btn">Ara</button>
+
+        // Temizle butonu (Arama varsa görünür)
+        if (!string.IsNullOrEmpty(ViewBag.CurrentSearch))
+        {
+            @Html.ActionLink("Temizle", "Index", "Admin", null, new { @class = "search-btn", style = "background:#ef4444; text-decoration:none;" })
+        }
+    }
+
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Kullanıcı Adı</th>
+                <th>Email</th>
+                <th>Yetki</th>
+                <th>İşlemler</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr>
+                    <td colspan="5" style="text-align:center; color:#9ca3af;">Aradığınız kriterde kullanıcı bulunamadı.</td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var user in Model)
+                {
+                    <tr>
+                        <td>@user.UserId</td>
+                        <td>@user.Username</td>
+                        <td>@user.Email</td>
+                        <td>
+                            @if (user.Role == "admin")
+                            {
+                                <span style="color:#4ade80">Yönetici</span>
+                            }
+                            else
+                            {
+                                <span style="color:#94a3b8">Üye</span>
+                            }
+                        </td>
+                        <td>
+                            @Html.ActionLink("Güncelle", "KullaniciDuzenle", "Admin",
+                                     new { id = user.UserId },
+                                     new { @class = "action-edit" })
+
+                            @if (user.Role != "admin")
+                            {
+                                @Html.ActionLink("Sil", "KullaniciSil", "Admin",
+                                         new { id = user.UserId },
+                                         new { @class = "action-delete", onclick = "return confirm('Bu üyeyi silmek istediğine emin misin?')" })
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

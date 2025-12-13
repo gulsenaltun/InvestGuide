@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Finans AI</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #0f0c29;
+            background-image: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+            background-attachment: fixed;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            min-height: 80px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #ffd700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-link-custom {
+            color: #ccc;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+            .nav-link-custom:hover {
+                background: rgba(255, 255, 255, 0.1);
+                color: #fff;
+                transform: translateY(-2px);
+            }
+
+        .nav-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-profil {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .btn-cikis {
+            color: #ff6b6b;
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            padding: 6px 15px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+            .btn-cikis:hover {
+                background: #ff6b6b;
+                color: #fff;
+            }
+
+        .main-content {
+            flex: 1;
+            padding: 40px 5%;
+            width: 100%;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #666;
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(0, 0, 0, 0.2);
+            margin-top: auto;
+        }
+
+        @@media screen and (max-width: 1024px) {
+            .navbar
+
+        {
+            justify-content: center;
+            flex-direction: column;
+            padding: 15px;
+        }
+
+        .nav-menu {
+            gap: 5px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .nav-link-custom {
+            font-size: 0.85rem;
+            padding: 6px 10px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .nav-profile {
+            justify-content: center;
+            width: 100%;
+        }
+
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        @Html.ActionLink("🤖 Finans AI", "Index", "Home", null, new { @class = "nav-logo" })
+
+        <div class="nav-menu">
+            @Html.ActionLink("💬 Sohbet", "Index", "Forum", null, new { @class = "nav-link-custom" })
+            @Html.ActionLink("🟡 Altın", "Altin", "Market", null, new { @class = "nav-link-custom", style = "color:#ffd700" })
+            @Html.ActionLink("💵 Dolar", "Dolar", "Market", null, new { @class = "nav-link-custom", style = "color:#2ecc71" })
+            @Html.ActionLink("💶 Euro", "Euro", "Market", null, new { @class = "nav-link-custom", style = "color:#3498db" })
+            @Html.ActionLink("₿ Bitcoin", "Bitcoin", "Market", null, new { @class = "nav-link-custom", style = "color:#f7931a" })
+        </div>
+
+        <div class="nav-profile">
+            @Html.ActionLink("👤 Profilim", "Index", "Profil", null, new { @class = "btn-profil" })
+            @Html.ActionLink("🚪 Çıkış", "Cikis", "Acilis", null, new { @class = "btn-cikis" })
+        </div>
+    </nav>
+
+    <div class="main-content">
+        @RenderBody()
+    </div>
+
+    <footer>
+        &copy; 2025 Finans AI - Tüm Hakları Saklıdır.
+    </footer>
+
+</body>
+</html>

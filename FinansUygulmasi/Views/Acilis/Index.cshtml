@@ -1,0 +1,311 @@
+﻿@using FinansUygulmasi.Models
+@using FinansUygulmasi.Models.ViewModels
+@model List<MarketDetailViewModel>
+
+@{
+    Layout = null;
+    var altin = Model?.FirstOrDefault(x => x.Symbol == "GOLD" || x.Symbol == "GA");
+    var dolar = Model?.FirstOrDefault(x => x.Symbol == "USD");
+    var euro = Model?.FirstOrDefault(x => x.Symbol == "EUR");
+    var btc = Model?.FirstOrDefault(x => x.Symbol == "BTC");
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finans AI Geleceği Şekillendir</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /*Tüm sayfaya otomatik uygulanacak olan*/
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #0f0c29;
+            background: linear-gradient(to right, #24243e, #302b63, #0f0c29); 
+            color: #fff;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /*Animasyonu oluşturur*/
+        @@keyframes float-anim {
+            0%{
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+
+            33% {
+                /* Telefonda taşmayı önlemek için */
+                transform: translate(3%, -5%) scale(1.1) rotate(5deg);
+            }
+
+            66% {
+                transform: translate(-2%, 4%) scale(0.9) rotate(-5deg);
+            }
+
+            100% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+            }
+        }
+
+        .background-blob {
+            position: absolute;
+            background: linear-gradient(45deg, #ffd700, #ff8c00); 
+            border-radius: 50%;
+            filter: blur(150px); 
+            opacity: 0.3;
+            animation: float-anim 15s infinite alternate; 
+            z-index: 0; 
+        }
+
+        .blob-1 {
+            width: 600px;
+            height: 600px;
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            width: 500px;
+            height: 500px;
+            bottom: -150px;
+            right: -150px;
+            animation-delay: 5s;
+        }
+
+        /*Temelde görünecek şeyin cssleri */
+        .container {
+            position: relative;
+            background: rgba(255, 255, 255, 0.08); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3); 
+            max-width: 1000px;
+            z-index: 1;
+        }
+
+            .container h1 {
+                font-size: 3.5rem;
+                margin-bottom: 20px;
+                line-height: 1.2;
+                color: #ffd700; 
+            }
+
+                .container h1 span {
+                    color: #fff;
+                }
+            
+
+            .container p {
+                font-size: 1.1rem;
+                color: #ccc;
+                margin-bottom: 40px;
+                max-width: 700px;
+                margin-left: auto;
+                margin-right: auto;
+                line-height: 1.6;
+            }
+
+        /*Buton kısımları*/
+        .cta-buttons {
+            margin-bottom: 50px;
+        }
+
+            .cta-buttons a {
+                text-decoration: none;
+                padding: 15px 40px;
+                border-radius: 30px;
+                font-weight: bold;
+                margin: 0 10px;
+                transition: all 0.3s ease;
+                display: inline-block;
+            }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            color: #000;
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 10px 25px rgba(255, 215, 0, 0.5);
+            }
+
+        .btn-outline {
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: #fff;
+            background: transparent;
+        }
+
+            .btn-outline:hover {
+                background: #fff;
+                color: #000;
+                border-color: #fff;
+                transform: translateY(-3px);
+            }
+
+        /* Sembollar ve işaretler */
+        .symbol-grid {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .symbol-item {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden; 
+            width: 180px;
+        }
+
+            .symbol-item:hover {
+                transform: translateY(-15px) scale(1.05);
+                box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            .symbol-item i {
+                font-size: 3.5rem;
+                color: #ffd700;
+                margin-bottom: 15px;
+                display: block;
+                transition: 0.3s;
+            }
+
+            .symbol-item:hover i {
+                transform: scale(1.1);
+                color: #ffff99;
+                text-shadow: 0 0 10px rgba(255, 255, 153, 0.7);
+            }
+
+            .symbol-item h3 {
+                font-size: 1.3rem;
+                color: #fff;
+            }
+
+            .symbol-item small {
+                color: #aaa;
+                display: block;
+                margin-top: 5px;
+            }
+
+            /* Sembol Kutusu Parıltı Animasyonu */
+            .symbol-item::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -150%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+                transform: skewX(-25deg);
+                transition: 0.7s;
+            }
+
+            .symbol-item:hover::before {
+                left: 150%;
+            }
+
+            /*Mobilde uyumlu olması için*/
+            @@media screen and (max-width: 768px) {
+                .container {
+                    width: 95%;
+                    padding: 30px 20px;
+                    margin: 20px 0; 
+                }
+                    /*başlığın boyutunu küçülttük*/
+                    .container h1 {
+                        font-size: 2rem;
+                    }
+               
+                .cta-buttons {
+                    display: flex;
+                    flex-direction: column; /*yan yana değil alt lata gelecek butonlar*/
+                    gap: 15px; /*aralarında boşluk olacak*/
+                }
+
+                    .cta-buttons a {
+                        margin: 0;
+                        width: 100%;
+                        text-align: center;
+                    }
+                
+                .symbol-grid {
+                    flex-direction: column;
+                    gap: 20px;
+                }
+                
+                .symbol-item {
+                    width: 100%;
+                }
+            }
+
+    </style>
+</head>
+<body>
+    <div class="background-blob blob-1"></div>
+    <div class="background-blob blob-2"></div>
+
+    <div class="container">
+        <h1>Yatırımlarını <br><span>Yapay Zeka</span> İle Şekillendir</h1>
+        <p>
+            Geleneksel yatırım tavsiyelerini geride bırakın. Gelişmiş yapay zeka algoritmalarımızla
+            Altın, Dolar ve Bitcoin piyasalarındaki kritik durumları öngörün.
+        </p>
+
+        <div class="cta-buttons">
+
+            @Html.ActionLink("Hemen Başla ->", "Giris", "Acilis", null, new { @class = "btn-primary" })
+                
+
+            @Html.ActionLink("Hesap Oluştur", "Kayit", "Acilis", null, new { @class = "btn-outline" })
+
+        </div>
+
+        <div class="symbol-grid">
+            <div class="symbol-item">
+                <i class="fa-solid fa-coins"></i>
+                <h3>Altın</h3>
+                <small>@(altin != null ? altin.CurrentPrice.ToString("N2"): "Yükleniyor...")</small>
+            </div>
+            <div class="symbol-item">
+                <i class="fa-solid fa-dollar-sign"></i>
+                <h3>Dolar</h3>
+                <small>@(dolar != null ? dolar.CurrentPrice.ToString("N2") : "Yükleniyor...")</small>
+            </div>
+            <div class="symbol-item">
+                <i class="fa-solid fa-euro-sign"></i>
+                <h3>Euro</h3>
+                <small>@(euro != null ? euro.CurrentPrice.ToString("N2") : "Yükleniyor...")</small>
+            </div>
+            <div class="symbol-item">
+                <i class="fa-brands fa-bitcoin"></i>
+                <h3>Bitcoin</h3>
+                <small>@(btc != null ? btc.CurrentPrice.ToString("N2") : "Yükleniyor...")</small>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

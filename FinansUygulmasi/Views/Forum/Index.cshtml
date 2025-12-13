@@ -1,0 +1,85 @@
+﻿@model List<FinansUygulmasi.Models.Entities.ForumKonu>
+
+@{
+    ViewData["Title"] = "Forum Sohbetleri";
+    Layout = "_Layout";
+}
+
+<style>
+    /* CSS KODLARI AYNEN KORUNDU */
+    .forum-container {
+        max-width: 1000px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .forum-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .btn-new-topic {
+        background: #2563eb;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 0.8rem;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .topic-card {
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-radius: 1rem;
+        position: relative;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .card-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1;
+        display: block; /* Tıklanabilir alanın oluşması için */
+    }
+</style>
+
+<div class="forum-container">
+    <div class="forum-header">
+        <h2 style="color:white; font-size:2rem;">💬 Finans Sohbetleri</h2>
+
+        @Html.ActionLink("+ Yeni Konu Aç", "Olustur", "Forum", null, new { @class = "btn-new-topic" })
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        foreach (var konu in Model)
+        {
+            <div class="topic-card">
+
+                @Html.ActionLink("", "Detay", "Forum", new { id = konu.Id }, new { @class = "card-link" })
+
+                <span style="background:rgba(59,130,246,0.2); color:#60a5fa; padding:2px 8px; border-radius:4px; font-size:0.8rem;">
+                    @konu.AssetTag
+                </span>
+
+                <h3 style="color:white; margin:10px 0;">@konu.Title</h3>
+
+                <div style="color:#9ca3af; font-size:0.9rem; display:flex; gap:15px;">
+                    <span>👤 @konu.Author.Username</span>
+                    <span>📅 @konu.CreatedAt.ToString("dd MMM HH:mm")</span>
+                    <span>💬 @(konu.Comments?.Count ?? 0) Yorum</span>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p style="text-align:center; color:gray;">Henüz konu yok.</p>
+    }
+</div>

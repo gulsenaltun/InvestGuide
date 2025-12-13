@@ -1,0 +1,147 @@
+﻿@using FinansUygulmasi.Models.ViewModels
+@model MarketDetailViewModel
+
+@{
+    // Rengi belirle
+    string themeColor = "#818cf8";
+    string arrowIcon = "fa-minus";
+    string arrowColor = "text-gray-400";
+
+    // Coine göre tema rengi
+    if (Model.ColorClass.Contains("yellow")) themeColor = "#facc15";
+    else if (Model.ColorClass.Contains("green")) themeColor = "#4ade80";
+    else if (Model.ColorClass.Contains("blue")) themeColor = "#60a5fa";
+    else if (Model.ColorClass.Contains("orange")) themeColor = "#fb923c";
+
+    // Yöne göre ok işareti ve rengi
+    if (Model.PredictionDirection == "Yukselis")
+    {
+        arrowIcon = "fa-arrow-trend-up";
+        arrowColor = "#4ade80"; // Yeşil
+    }
+    else if (Model.PredictionDirection == "Dusus")
+    {
+        arrowIcon = "fa-arrow-trend-down";
+        arrowColor = "#f87171"; // Kırmızı
+    }
+}
+
+<style>
+    .prediction-card {
+        width: 100%;
+        max-width: 600px;
+        background-color: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 2rem;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        margin: 0 auto;
+        text-align: center;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+    }
+
+    .glow {
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, @themeColor 0%, transparent 60%);
+        opacity: 0.15;
+        pointer-events: none;
+    }
+
+    .icon-box {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: @themeColor;
+        margin: 0 auto 1rem auto;
+        box-shadow: 0 0 20px @(themeColor) 40;
+    }
+
+    .big-price {
+        font-size: 3.5rem;
+        font-weight: 800;
+        color: white;
+        line-height: 1;
+        font-family: monospace;
+        margin: 1.5rem 0;
+    }
+
+    .direction-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.8rem;
+        background: rgba(255,255,255,0.05);
+        color: @arrowColor;
+        font-weight: 700;
+        font-size: 1.1rem;
+        border: 1px solid @arrowColor;
+    }
+
+    .analysis-text {
+        color: #d1d5db;
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin: 2rem 0;
+        font-style: italic;
+    }
+
+    .confidence-bar {
+        height: 6px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+
+    .confidence-fill {
+        height: 100%;
+        background: @themeColor;
+        width: @Model.ConfidenceScore %;
+    }
+</style>
+
+<div class="prediction-card">
+    <div class="glow"></div>
+
+    <div class="icon-box">
+        <i class="fas @Model.IconClass"></i>
+    </div>
+    <h2 style="color: white; margin: 0;">@Model.Name Tahmini</h2>
+    <span style="color: #999; font-size: 0.8rem;">24 SAATLİK ÖNGÖRÜ</span>
+
+    <div class="big-price">
+        @Model.PredictedPrice.ToString("N2") ₺
+    </div>
+
+    <div class="direction-badge">
+        <i class="fas @arrowIcon"></i>
+        <span>@(Model.PredictionDirection == "Yukselis" ? "Yükseliş Bekleniyor" : "Düşüş Bekleniyor")</span>
+    </div>
+
+    <p class="analysis-text">
+        "@Model.AIComment"
+    </p>
+
+    <div style="text-align: left;">
+        <div style="display: flex; justify-content: space-between; color: #ccc; font-size: 0.8rem;">
+            <span>Yapay Zeka Güven Skoru</span>
+            <span>%@Model.ConfidenceScore</span>
+        </div>
+        <div class="confidence-bar">
+            <div class="confidence-fill" style="width: @Model.ConfidenceScore%;"></div>
+        </div>
+    </div>
+</div>  

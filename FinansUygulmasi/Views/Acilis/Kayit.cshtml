@@ -1,0 +1,241 @@
+﻿@using FinansUygulmasi.Models.ViewModels
+@model KayitViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap">
+
+    <style>
+        *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+        }
+
+        body{
+        background-color: #0f0c29;
+        background-image: linear-gradient(to right, #24243e, #302b63, #0f0c29);
+        color: #fff;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        position: relative;
+        }
+
+        .kutu-paneli{
+            padding: 40px;
+            position: relative;
+            z-index:10;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            width: 90%;
+            max-width: 550px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border-radius: 30px;
+        }
+
+        .kutu-paneli h2{
+            margin-bottom: 10px; 
+            color: #fff;
+            font-size: 2rem;
+        }
+
+        .kutu-paneli p {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .ozel-input{
+            width: 100%;
+            padding: 15px;
+            background:  rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            color: #fff;
+            outline: none;
+            transition: 0.3s;
+            font-size: 1rem;
+        }
+
+        .ozel-input:focus{
+            border-color: #ffd700;
+            background: rgba(0,0,0,0.5);
+            box-shadow: 0 0 15px rgba(255,215,0,0.1);
+        }
+
+        .etiket-satiri{
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            padding-left: 5px;
+        }
+
+        .girdi-satiri{
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .girdi.ikonu{
+            color: #ffd700;
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+
+        .input-etiketi{
+            color: #ccc;
+            font-size: 0.9rem;
+            font-weight:500;
+            cursor: pointer;
+            padding-left: 5px;
+        }
+        
+        .kayit-yap-butonu{
+            width: 100%;
+            padding: 15px ;
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            color: #000;
+            transition: transform 0.2s;
+            margin-top: 10px;
+            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+        }
+
+        .kayit-yap-butonu:hover{
+            transform: scale(1.03);
+        }
+
+        .hata-kutusu{
+            color: #ff6b6b;
+            background: rgba(255,0,0.1);
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .field-validation-error{
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            display: block;
+            margin-left: 15px;
+        }
+
+        .mevcut-uyelik{
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .mevcut-uyelik a{
+            color: #ffd700;
+            text-decoration: none;
+        }
+
+        /*mobilde uyumlu olması için*/
+        @@media screen and (max-width: 600px)
+        {
+            .kutu-paneli {
+                padding: 30px 20px;
+                max-width: 95%;
+            }
+
+            .kutu-paneli h2 {
+                font-size: 1.5rem;
+            }
+
+            .ucan-simge {
+                font-size: 1.5rem !important;
+            }
+
+            .girdi-ikonu {
+                top: 38px;
+            }
+
+            .input-etiketi{
+                top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    @await Html.PartialAsync("_ArkaPlan")
+
+    <div class="arka-plan-izgara"></div>
+
+    <div class="kutu-paneli">
+        <i class="fa-solid fa-user-plus" style="font-size: 3rem; color:#fff; margin-bottom: 20px"></i>
+            <h2>Hemen Üye Ol</h2>
+            <p>Yapay zeka destekli yatırım dünyasına siz de katılın.</p>
+
+            @if (ViewBag.Hata != null)
+            {
+                <div class="hata-kutusu">@ViewBag.Hata</div>    
+            }
+
+            @using (Html.BeginForm("Kayit", "Acilis", FormMethod.Post))
+            {
+                <div class="girdi-satiri">
+                    <div class="etiket-satiri">
+                        <i class="fa-solid fa-user girdi-ikonu"> </i>
+                        @Html.LabelFor(m=>m.UserName, new{@class = "input-etiketi"})
+                    </div>
+                        @Html.TextBoxFor(m=>m.UserName, new {@class = "ozel-input", placeholder="Ad Soyad"})
+                        @Html.ValidationMessageFor(m=>m.UserName,"", new {@class = "field-validation-error"})
+                </div>    
+
+                <div class="girdi-satiri">
+                    <div class="etiket-satiri">
+                        <i class="fa-solid fa-envelope girdi-ikonu"></i>
+                        @Html.LabelFor(m=>m.Email, new {@class = "input-etiketi"})
+                    </div>
+                    @Html.TextBoxFor(m=>m.Email, new {@class = "ozel-input", placeholder="E-Posta Adresi"})
+                    @Html.ValidationMessageFor(m=>m.Email, "", new {@class = "field-validation-error"})
+                </div>
+
+                <div class="girdi-satiri">
+                    <div class="etiket-satiri">
+                        <i class="fa-solid fa-lock girdi-ikonu"></i>
+                        @Html.LabelFor(m=>m.Password, new {@class = "input-etiketi"})
+                    </div>
+                    @Html.PasswordFor(m=> m.Password, new{@class = "ozel-input", placeholder="Şifre"})
+                    @Html.ValidationMessageFor(m=>m.Password, "", new{@class = "field-validation-error"})
+                </div>
+
+                <div class="girdi-satiri">
+                    <div class="etiket-satiri">
+                        <i class="fa-solid fa-key girdi-ikonu"></i>
+                        @Html.LabelFor(m=>m.ConfirmPassword, new{@class = "input-etiketi"})
+                    </div>
+                    @Html.PasswordFor(m=> m.ConfirmPassword, new {@class = "ozel-input", placeholder="Şifre Tekrar"})
+                    @Html.ValidationMessageFor(m=>m.ConfirmPassword, "", new{@class = "field-validation-error"})
+                </div>
+
+                <button type="submit" class="kayit-yap-butonu">Hesap Oluştur</button>
+            }
+
+            <div class="mevcut-uyelik">
+                Zaten üye misin? 
+                <a href="@Url.Action("Giris", "Acilis")">Giriş Yap</a>
+            </div>        
+    </div>
+</body>
+</html>
