@@ -28,7 +28,7 @@ try:
     print("Site açıldı, 'Son 5 Yıl' seçiliyor...")
     select_element = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "date-ranges")))
     select = Select(select_element)
-    select.select_by_value("1607374800")
+    select.select_by_visible_text("Son 5 Yıl")
 
     # 2. "Verileri Getir" Butonuna Tıkla
     fetch_button = driver.find_element(By.CLASS_NAME, "load-historical-data")
