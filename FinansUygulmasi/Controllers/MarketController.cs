@@ -238,5 +238,28 @@ namespace FinansUygulmasi.Controllers
             // 'text/html' diyerek tarayıcıya bunun bir kod olduğunu söylüyoruz
             return Content(htmlIcerik, "text/html; charset=utf-8");
         }
+
+        // --- ASİSTAN (YAPAY ZEKA) SAYFASI (GET) ---
+        // --- ASİSTAN SAYFASI (Eksik olan parça bu) ---
+        // --- ASİSTAN (ASK) SAYFASI ---
+        public IActionResult Ask(string symbol)
+        {
+            // 1. Market Kapalıysa Engelle
+            if (AdminController.MarketErisimiAcik == false)
+            {
+                // İstersen burada "MarketKapaliMesaji()" metodunu da çağırabilirsin
+                return RedirectToAction("Index");
+            }
+
+            // 2. Sembol boş geldiyse ana sayfaya at
+            if (string.IsNullOrEmpty(symbol)) return RedirectToAction("Index");
+
+            // 3. KRİTİK ADIM: View Component'in çalışması için bu veriyi taşıyoruz
+            // Ask.cshtml sayfasındaki "ViewBag.Symbol" burayı okur.
+            ViewBag.Symbol = symbol;
+
+            // 4. Sadece View'ı aç (Geri kalan işi Component yapacak)
+            return View();
+        }
     }
 }
