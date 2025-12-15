@@ -236,16 +236,21 @@ namespace FinansUygulmasi.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
 
-            var update = Builders<ForumKonu>.Update
+            var update = Builders<FinansUygulmasi.Models.Entities.ForumKonu>.Update
                 .PullFilter(x => x.Comments, c => c.CommentId == yorumId);
 
             await _mongoContext.Tartismalar.UpdateOneAsync(x => x.Id == konuId, update);
+            // _mongoContext kullanarak silme işlemi yapıyoruz
+            var result = await _mongoContext.Tartismalar
+                .UpdateOneAsync(x => x.Id == konuId, update);
 
-            TempData["Mesaj"] = "Ana yorum silindi.";
+            if (result.ModifiedCount > 0)
+                TempData["Mesaj"] = "Yorum silindi.";
+            else
+                TempData["Hata"] = "Silinemedi.";
+
             return RedirectToAction("Yorumlar");
         }
-
-        // 3. TEK BİR YANITI SİL (ÖZEL MANTIK)
         public async Task<IActionResult> YanitSil(string konuId, int anaYorumId, string yanitIcerik)
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
