@@ -2,146 +2,264 @@
 @model MarketDetailViewModel
 
 @{
-    // Rengi belirle
-    string themeColor = "#818cf8";
-    string arrowIcon = "fa-minus";
-    string arrowColor = "text-gray-400";
+    Layout = null; // Eğer bir layout içinde çağıracaksanız bunu kaldırın
 
-    // Coine göre tema rengi
-    if (Model.ColorClass.Contains("yellow")) themeColor = "#facc15";
-    else if (Model.ColorClass.Contains("green")) themeColor = "#4ade80";
-    else if (Model.ColorClass.Contains("blue")) themeColor = "#60a5fa";
-    else if (Model.ColorClass.Contains("orange")) themeColor = "#fb923c";
+    // Tema Rengi Belirleme
+    string themeColor = "#818cf8"; // Varsayılan İndigo
+    string glowColor = "rgba(129, 140, 248, 0.2)";
+    string iconClass = Model.IconClass;
 
-    // Yöne göre ok işareti ve rengi
     if (Model.PredictionDirection == "Yukselis")
     {
-        arrowIcon = "fa-arrow-trend-up";
-        arrowColor = "#4ade80"; // Yeşil
+        themeColor = "#4ade80"; // Yeşil
+        glowColor = "rgba(74, 222, 128, 0.2)";
     }
     else if (Model.PredictionDirection == "Dusus")
     {
-        arrowIcon = "fa-arrow-trend-down";
-        arrowColor = "#f87171"; // Kırmızı
+        themeColor = "#f87171"; // Kırmızı
+        glowColor = "rgba(248, 113, 113, 0.2)";
     }
 }
 
 <style>
-    .prediction-card {
-        width: 100%;
-        max-width: 600px;
-        background-color: rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 2rem;
-        padding: 2.5rem;
+    .ai-dashboard {
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 1.5rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        max-width: 800px;
+        margin: 0 auto;
         position: relative;
         overflow: hidden;
-        margin: 0 auto;
-        text-align: center;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.4);
     }
 
-    .glow {
+    /* Arka Plan Efekti */
+    .bg-glow {
         position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, @themeColor 0%, transparent 60%);
+        top: -50px;
+        right: -50px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, @themeColor 0%, transparent 70%);
         opacity: 0.15;
+        filter: blur(60px);
         pointer-events: none;
     }
 
-    .icon-box {
-        width: 5rem;
-        height: 5rem;
-        border-radius: 50%;
+    /* Header Alanı */
+    .dashboard-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .coin-icon-box {
+        width: 4rem;
+        height: 4rem;
+        border-radius: 1rem;
         background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 2.5rem;
+        font-size: 2rem;
         color: @themeColor;
-        margin: 0 auto 1rem auto;
-        box-shadow: 0 0 20px @(themeColor) 40;
+        border: 1px solid rgba(255,255,255,0.1);
     }
 
-    .big-price {
-        font-size: 3.5rem;
-        font-weight: 800;
-        color: white;
-        line-height: 1;
-        font-family: monospace;
-        margin: 1.5rem 0;
+    .header-info h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 700;
     }
 
-    .direction-badge {
-        display: inline-flex;
+    .header-info span {
+        color: #94a3b8;
+        font-size: 0.9rem;
+    }
+
+    /* İçerik Izgarası */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard-grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    }
+
+    /* Sol Taraf: Analiz Metni */
+    .analysis-section {
+        background: rgba(255,255,255,0.03);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .section-title {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+        display: flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 0.8rem;
-        background: rgba(255,255,255,0.05);
-        color: @arrowColor;
-        font-weight: 700;
-        font-size: 1.1rem;
-        border: 1px solid @arrowColor;
     }
 
-    .analysis-text {
-        color: #d1d5db;
-        font-size: 1.1rem;
-        line-height: 1.6;
-        margin: 2rem 0;
-        font-style: italic;
+    .ai-text {
+        line-height: 1.7;
+        color: #e2e8f0;
+        font-size: 1.05rem;
     }
 
-    .confidence-bar {
-        height: 6px;
-        background: rgba(255,255,255,0.1);
-        border-radius: 3px;
+    /* Sağ Taraf: Metrikler */
+    .metrics-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    /* Fiyat Kartı */
+    .metric-card {
+        background: rgba(255,255,255,0.03);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(255,255,255,0.05);
+        text-align: center;
+        position: relative;
         overflow: hidden;
-        margin-top: 5px;
     }
 
-    .confidence-fill {
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: @themeColor;
+        }
+
+    .price-label {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .price-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        font-family: monospace;
+    }
+
+    .direction-tag {
+        display: inline-block;
+        margin-top: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 2rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: @glowColor;
+        color: @themeColor;
+        border: 1px solid @themeColor;
+    }
+
+    /* Güven Skoru */
+    .confidence-wrapper {
+        margin-top: auto;
+    }
+
+    .conf-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        color: #cbd5e1;
+    }
+
+    .progress-track {
+        height: 8px;
+        background: #334155;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
         height: 100%;
         background: @themeColor;
-        width: @Model.ConfidenceScore %;
+        width: 0%; /* JS ile animasyonlanacak */
+        border-radius: 4px;
+        transition: width 1.5s ease-out;
+        box-shadow: 0 0 10px @themeColor;
     }
+
 </style>
 
-<div class="prediction-card">
-    <div class="glow"></div>
+<div class="ai-dashboard">
+    <div class="bg-glow"></div>
 
-    <div class="icon-box">
-        <i class="fas @Model.IconClass"></i>
-    </div>
-    <h2 style="color: white; margin: 0;">@Model.Name Tahmini</h2>
-    <span style="color: #999; font-size: 0.8rem;">24 SAATLİK ÖNGÖRÜ</span>
-
-    <div class="big-price">
-        @Model.PredictedPrice.ToString("N2") ₺
-    </div>
-
-    <div class="direction-badge">
-        <i class="fas @arrowIcon"></i>
-        <span>@(Model.PredictionDirection == "Yukselis" ? "Yükseliş Bekleniyor" : "Düşüş Bekleniyor")</span>
-    </div>
-
-    <p class="analysis-text">
-        "@Model.AIComment"
-    </p>
-
-    <div style="text-align: left;">
-        <div style="display: flex; justify-content: space-between; color: #ccc; font-size: 0.8rem;">
-            <span>Yapay Zeka Güven Skoru</span>
-            <span>%@Model.ConfidenceScore</span>
+    <div class="dashboard-header">
+        <div class="coin-icon-box">
+            <i class="fas @Model.IconClass"></i>
         </div>
-        <div class="confidence-bar">
-            <div class="confidence-fill" style="width: @Model.ConfidenceScore%;"></div>
+        <div class="header-info">
+            <h2>@Model.Name Analizi</h2>
+            <span>Yapay Zeka Destekli Piyasa Raporu</span>
         </div>
     </div>
-</div>  
+
+    <div class="dashboard-grid">
+
+        <div class="analysis-section">
+            <div class="section-title">
+                <i class="fas fa-robot"></i> AI GÖRÜŞÜ
+            </div>
+            <p class="ai-text">
+                "@Model.AIComment"
+            </p>
+        </div>
+
+        <div class="metrics-section">
+
+            <div class="metric-card">
+                <div class="price-label">24 SAATLİK HEDEF</div>
+                <div class="price-value">@Model.PredictedPrice.ToString("N2") ₺</div>
+
+                <div class="direction-tag">
+                    @if (Model.PredictionDirection == "Yukselis")
+                    {
+                        <i class="fas fa-arrow-trend-up"></i> <span>YÜKSELİŞ BEKLENTİSİ</span>
+                    }
+                    else
+                    {
+                        <i class="fas fa-arrow-trend-down"></i> <span>DÜŞÜŞ RİSKİ</span>
+                    }
+                </div>
+            </div>
+
+            <div class="confidence-wrapper">
+                <div class="conf-header">
+                    <span>Model Güven Skoru</span>
+                    <strong>%@Model.ConfidenceScore</strong>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width: @Model.ConfidenceScore%"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

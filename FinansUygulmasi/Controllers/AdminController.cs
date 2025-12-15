@@ -4,13 +4,15 @@ using FinansUygulmasi.Models.Entities;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using FinansUygulmasi.Models.ViewModels;
+using MongoDB.Driver;
+using MongoDB.Bson;
 
 namespace FinansUygulmasi.Controllers
 {
     public class AdminController : Controller
     {
-        private readonly ApplicationDbContext _context;
-
+        private readonly ApplicationDbContext _sqlContext; 
+        private readonly MongoDbContext _mongoContext;
         public static bool MarketErisimiAcik
         {
             get
@@ -25,9 +27,11 @@ namespace FinansUygulmasi.Controllers
                 System.IO.File.WriteAllText(dosyaYolu, value ? "1" : "0");
             }
         }
-        public AdminController(ApplicationDbContext context)
+        public AdminController(ApplicationDbContext context, MongoDbContext mongoContext)
         {
-            _context = context;
+            _sqlContext = context;
+            _mongoContext = mongoContext;
+
         }
 
         private bool IsAdmin()
@@ -40,7 +44,7 @@ namespace FinansUygulmasi.Controllers
             }
 
             // 2. Adım: Bu e-posta ile veritabanındaki kullanıcıyı bul
-            var user = _context.Users.FirstOrDefault(x => x.Email == girisYapanEmail);
+            var user = _sqlContext.Users.FirstOrDefault(x => x.Email == girisYapanEmail);
 
             if (user != null && user.Role == "admin")
             {
@@ -55,11 +59,11 @@ namespace FinansUygulmasi.Controllers
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
 
             // İstatistikler
-            ViewBag.ToplamKullanici = _context.Users.Count();
+            ViewBag.ToplamKullanici = _sqlContext.Users.Count();
             ViewBag.MarketDurumu = MarketErisimiAcik ? "Açık" : "Kapalı";
 
             // Kullanıcı Listesi Sorgusu
-            var usersQuery = _context.Users.AsQueryable();
+            var usersQuery = _sqlContext.Users.AsQueryable();
 
             // Eğer arama yapıldıysa filtrele
             if (!string.IsNullOrEmpty(search))
@@ -84,7 +88,7 @@ namespace FinansUygulmasi.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
 
-            var user = _context.Users.Find(id);
+            var user = _sqlContext.Users.Find(id);
             if (user == null) return RedirectToAction("Index");
 
             return View(user);
@@ -95,7 +99,7 @@ namespace FinansUygulmasi.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
 
-            var existingUser = _context.Users.Find(model.UserId);
+            var existingUser = _sqlContext.Users.Find(model.UserId);
             if (existingUser != null)
             {
                 // Sadece izin verilen alanları güncelliyoruz
@@ -109,7 +113,7 @@ namespace FinansUygulmasi.Controllers
                     existingUser.PasswordHash = model.PasswordHash;
                 }
 
-                _context.SaveChanges();
+                _sqlContext.SaveChanges();
                 TempData["Mesaj"] = "Kullanıcı başarıyla güncellendi.";
             }
 
@@ -121,7 +125,7 @@ namespace FinansUygulmasi.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
 
-            var users = _context.Users.AsQueryable();
+            var users = _sqlContext.Users.AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -142,7 +146,7 @@ namespace FinansUygulmasi.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
 
-            var user = _context.Users.Find(id);
+            var user = _sqlContext.Users.Find(id);
 
             if (user != null)
             {
@@ -152,19 +156,19 @@ namespace FinansUygulmasi.Controllers
                     return RedirectToAction("Kullanicilar");
                 }
 
-                var kullaniciIslemleri = _context.Transactions.Where(x => x.UserId == id).ToList();
+                var kullaniciIslemleri = _sqlContext.Transactions.Where(x => x.UserId == id).ToList();
 
                 if (kullaniciIslemleri.Any())
                 {
-                    _context.Transactions.RemoveRange(kullaniciIslemleri);
+                    _sqlContext.Transactions.RemoveRange(kullaniciIslemleri);
                 }
 
 
                 // --- 2. ADIM: KULLANICIYI SİL ---
-                _context.Users.Remove(user);
+                _sqlContext.Users.Remove(user);
 
                 // Tüm değişiklikleri (hem transaction silme hem user silme) kaydet
-                _context.SaveChanges();
+                _sqlContext.SaveChanges();
             }
 
             return RedirectToAction("Kullanicilar");
@@ -178,6 +182,88 @@ namespace FinansUygulmasi.Controllers
             MarketErisimiAcik = !MarketErisimiAcik;
 
             return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> Yorumlar()
+        {
+            if (!IsAdmin()) return RedirectToAction("Index", "Home");
+
+            // _mongoContext kullanarak verileri çekiyoruz
+            var tumKonular = await _mongoContext.Tartismalar.Find(_ => true).ToListAsync();
+
+            var adminYorumListesi = new List<MesajViewModel>();
+
+            foreach(var konu in tumKonular)
+            {
+                if (konu.Comments != null)
+                {
+                    foreach (var yorum in konu.Comments)
+                    {
+                        // -- YANITLARI HAZIRLIYORUZ --
+                        var yanitlarListesi = new List<AdminYanitViewModel>();
+                        if (yorum.Replies != null)
+                        {
+                            foreach (var rep in yorum.Replies)
+                            {
+                                yanitlarListesi.Add(new AdminYanitViewModel
+                                {
+                                    KullaniciAdi = rep.Username,
+                                    Icerik = rep.Text,
+                                    Tarih = rep.Date
+                                });
+                            }
+                        }
+
+                        // -- ANA LİSTEYE EKLİYORUZ --
+                        adminYorumListesi.Add(new MesajViewModel
+                        {
+                            Id = konu.Id,                // Konu ID
+                            YorumId = yorum.CommentId,   // Yorum ID
+                            KonuBasligi = konu.Title,
+                            KullaniciAdi = yorum.Username,
+                            Icerik = yorum.Text,
+                            Tarih = yorum.Date,
+                            Yanitlar = yanitlarListesi   // Yanıtları buraya koyduk
+                        });
+                    }
+                }
+            }
+
+            return View(adminYorumListesi.OrderByDescending(x => x.Tarih).ToList());
+        }
+
+        public async Task<IActionResult> YorumSil(string konuId, int yorumId)
+        {
+            if (!IsAdmin()) return RedirectToAction("Index", "Home");
+
+            var update = Builders<ForumKonu>.Update
+                .PullFilter(x => x.Comments, c => c.CommentId == yorumId);
+
+            await _mongoContext.Tartismalar.UpdateOneAsync(x => x.Id == konuId, update);
+
+            TempData["Mesaj"] = "Ana yorum silindi.";
+            return RedirectToAction("Yorumlar");
+        }
+
+        // 3. TEK BİR YANITI SİL (ÖZEL MANTIK)
+        public async Task<IActionResult> YanitSil(string konuId, int anaYorumId, string yanitIcerik)
+        {
+            if (!IsAdmin()) return RedirectToAction("Index", "Home");
+
+            // MongoDB Query: "Comments" dizisi içindeki "Replies" dizisinden, "text"i eşleşeni çıkar.
+            var filter = Builders<ForumKonu>.Filter.And(
+                Builders<ForumKonu>.Filter.Eq(x => x.Id, konuId),
+                Builders<ForumKonu>.Filter.ElemMatch(x => x.Comments, c => c.CommentId == anaYorumId)
+            );
+
+            // BsonDocument filtresi için "MongoDB.Bson" kütüphanesi gereklidir (Yukarıya ekledim)
+            var update = Builders<ForumKonu>.Update
+                .PullFilter("Comments.$.Replies", Builders<BsonDocument>.Filter.Eq("text", yanitIcerik));
+
+            await _mongoContext.Tartismalar.UpdateOneAsync(filter, update);
+
+            TempData["Mesaj"] = "Yanıt silindi.";
+            return RedirectToAction("Yorumlar");
         }
     }
 }
