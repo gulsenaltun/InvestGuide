@@ -10,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kayıt Ol</title>
+    <title>Kayıt Ol - Yatırım Rehberi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap">
 
@@ -177,7 +177,7 @@
 </head>
 <body>
 
-    @await Html.PartialAsync("_ArkaPlan")
+    @await Html.PartialAsync("_ArkaPlan") <!--haraketli arka plan kodlarını çağırır-->
 
     <div class="arka-plan-izgara"></div>
 
@@ -186,12 +186,14 @@
             <h2>Hemen Üye Ol</h2>
             <p>Yapay zeka destekli yatırım dünyasına siz de katılın.</p>
 
+        <!--controllerdeki hatayı veriri tekrar aynı meille kayıt olmaya çalışırsa falan-->
             @if (ViewBag.Hata != null)
             {
                 <div class="hata-kutusu">@ViewBag.Hata</div>    
             }
 
-            @using (Html.BeginForm("Kayit", "Acilis", FormMethod.Post))
+            <!--kayıt metoduna post edilmesini sağlar-->
+            @using (Html.BeginForm("Kayit", "Acilis", FormMethod.Post)) 
             {
                 <div class="girdi-satiri">
                     <div class="etiket-satiri">
@@ -208,6 +210,8 @@
                         @Html.LabelFor(m=>m.Email, new {@class = "input-etiketi"})
                     </div>
                     @Html.TextBoxFor(m=>m.Email, new {@class = "ozel-input", placeholder="E-Posta Adresi"})
+                    
+                    <!--kullanıcı boş bırakırsa hata mesajını gönderir-->
                     @Html.ValidationMessageFor(m=>m.Email, "", new {@class = "field-validation-error"})
                 </div>
 

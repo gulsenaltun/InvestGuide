@@ -9,7 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!--Esneklik için en önemli yer burası-->
-    <title>Giriş Yap - Finans AI</title>
+    <title>Giriş Yap - Yatırım Rehberi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
@@ -17,24 +17,23 @@
         * {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+			box-sizing: border-box; /*kutunun şişmesini engeller*/
+			font-family: 'Poppins', sans-serif;
         }
 
         body {
             background-color: #0f0c29;
             background-image: linear-gradient(to right, #24243e, #302b63, #0f0c29);
             color: #fff;
-            min-height: 100vh;
+			min-height: 100vh; /*ekranı tam kaplama*/
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
+			display: flex; /*bodyi kapsayıcı yapar işlemleri kolaylaştırır*/
+            justify-content: center; /*yatayda ortala*/
+            align-items: center; /*dikeyde ortala*/
+            overflow: hidden; /*scroll bar çıkmasın*/
             position: relative;
         }
 
-        /*giris ekranı için*/
         .giris-paneli {
             position: relative;
             z-index: 10;
@@ -70,7 +69,7 @@
             color: #fff;
             outline: none;
             margin-bottom: 20px;
-            transition: 0.3s;
+            transition: 0.3s; /*animasyon süresi*/
             font-size: 1rem;
         }
 
@@ -86,7 +85,7 @@
         }
 
         .girdi-ikonu {
-            position: absolute;
+            position: absolute; /*serbest dolaşım hakkı*/
             left: 15px;
             top: 42px;
             color: #ffd700;
@@ -109,7 +108,7 @@
         }
 
             .giris-yap-butonu:hover {
-                transform: scale(1.05);
+                transform: scale(1.05); /*yüzde 5 büyüt*/
                 box-shadow: 0 10px 25px rgba(255, 215, 0, 0.5);
             }
 
@@ -143,7 +142,7 @@
             text-decoration: underline;
         }
 
-        /*mobil için uyumluluk*/
+        /*mobilde esnek tasrım, uyumluluk için*/
         @@media screen and (max-width: 600px) {
             .giris-paneli {
                 padding: 30px 20px;
@@ -172,15 +171,15 @@
 </head>
     <body>
 
-    @await Html.PartialAsync("_ArkaPlan")
+    @await Html.PartialAsync("_ArkaPlan") 
 
     <div class="arka-plan-izgara"></div>
 
-    <!--Giriş ekranı-->
     <div class="giris-paneli">
         <h2>Giriş Yap</h2>
         <p>Yapay zeka ile yatırımlarını yönet</p>
 
+        <!--hata mesajı varsa gösterir-->
         @if (ViewBag.Hata != null)
         {
             <div class="hata-kutusu">
@@ -188,6 +187,7 @@
             </div>
         }
 
+        <!-- form etiketi oluşturur giriş metoduna bastığında post(gönderme) eder-->
         @using (Html.BeginForm("Giris", "Acilis", FormMethod.Post))
         {
             <div class="girdi-satiri">
@@ -204,6 +204,7 @@
 
             <button type="submit" class="giris-yap-butonu">Giriş Yap</button>
 
+            <!--şifremi unuttum sayfasına gitmek için-->
             <div style="margin-top: 15px;">
                 @Html.ActionLink("Şifreni mi unuttun?", "SifremiUnuttum", "Acilis", null, new {@class ="sifre-link"})
             </div>

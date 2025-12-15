@@ -3,6 +3,9 @@ using FinansUygulmasi.Models.ViewModels;
 using FinansUygulmasi.Services;
 using FinansUygulmasi.Data;
 using FinansUygulmasi.Models.Entities;
+using System.Net.Mail;
+using System.Net;
+using Microsoft.AspNetCore.Identity; //hashleme işlemi için
 
 namespace FinansUygulmasi.Controllers
 {
@@ -28,28 +31,46 @@ namespace FinansUygulmasi.Controllers
         {
             if (!string.IsNullOrEmpty(HttpContext.Session.GetString("UserEmail")))
             {
-                return RedirectToAction("Index", "Profil");
+                return RedirectToAction("Index", "Profil"); //form yönlendirmek için
             }
-            return View(new LoginViewModel());
+
+            var model = new LoginViewModel();
+
+
+            //Kayıt olunurken kullanılan emaili direkt tempdata ile giriş ekranına gönderir
+            if (TempData["KayitOlunanEmail"] != null)
+            {
+                model.Email = TempData["KayitOlunanEmail"].ToString();
+            }
+
+            // Modeli View'a gönderiyoruz (böylece input dolu gelecek)
+            return View(model);
         }
 
         [HttpPost]
         public IActionResult Giris(LoginViewModel model)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == model.Email && u.PasswordHash == model.Password);
+            var user = _context.Users.FirstOrDefault(u => u.Email == model.Email);
 
             if (user != null)
             {
-                // Giriş başarılı olunca e-postayı session'a kaydediyoruz.
-                HttpContext.Session.SetString("UserEmail", user.Email);
+                var hasher = new PasswordHasher<User>();
 
-                HttpContext.Session.SetInt32("UserId", user.UserId);
-                HttpContext.Session.SetString("UserName", user.Username);
+                //kullanıcı nesnesi, veritabanındaki hash, girilen şifre
+                var verificationResult = hasher.VerifyHashedPassword(user, user.PasswordHash, model.Password);
 
-                if (user.Role == "admin")
-                    return RedirectToAction("Index", "Admin");
-                // Profil sayfasına yönlendiriyoruz
-                return RedirectToAction("Index", "Home");
+                //sonuç başarılı yani succes ise bunları yap
+                if (verificationResult == PasswordVerificationResult.Success)
+                {
+                    HttpContext.Session.SetString("UserEmail", user.Email);
+                    HttpContext.Session.SetInt32("UserId", user.UserId);
+                    HttpContext.Session.SetString("UserName", user.Username);
+
+                    if (user.Role == "admin")
+                        return RedirectToAction("Index", "Admin");
+                    // admin değilsa kullanıcı profil sayfasına yönlendiriyoruz
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
             ViewBag.Hata = "Hatalı e-posta veya şifre!";
@@ -60,7 +81,6 @@ namespace FinansUygulmasi.Controllers
         {
             // Session'ı temizle
             HttpContext.Session.Clear();
-            // Ana sayfaya veya giriş sayfasına at
             return RedirectToAction("Index");
         }
 
@@ -75,12 +95,36 @@ namespace FinansUygulmasi.Controllers
         {
             if (ModelState.IsValid)
             {
-                TempData["Basarimesaji"] = "Sıfırlama bağlantısı e-postanıza gönderildi. Kontrol ediniz";
-                return RedirectToAction("Giris");
-            }
+                var user = _context.Users.FirstOrDefault(u => u.Email == model.Email); //kullanıcıyı veritabanında bulurum
 
-            return View(model);
+                if (user == null)
+                {
+                    ViewBag.Hata = "Bu e-posta adresiyle kayıtlı bir kullanıcı bulunamadı.";
+                    return View(model);
+                }
+
+                string yeniSifre = RastgeleSifreOlustur();
+
+                try
+                {
+                    MailGonder(user.Email, yeniSifre);
+                    var hasher = new PasswordHasher<User>();
+
+                    //mesaj gönderildikten sonra şifreyi güncelliyorum
+                    user.PasswordHash = hasher.HashPassword(user, yeniSifre);
+                    _context.SaveChanges();
+
+                    TempData["BasariMesaji"] = "Yeni şifreniz e-posta adresinize gönderildi. Lütfen gelen kutunuzu (ve spam klasörünü) kontrol ediniz.";
+                    return RedirectToAction("Giris"); // Başarılıysa girişe at
+                }
+                catch (Exception)
+                {
+                    ViewBag.Hata = "Şifre güncellendi ancak mail gönderilemedi. Lütfen yöneticiyle iletişime geçin.";
+                }
+            }
+                return View(model);
         }
+
         [HttpGet]
         public IActionResult Kayit()
         {
@@ -99,14 +143,23 @@ namespace FinansUygulmasi.Controllers
                     return View(model);
                 }
 
-                var yeniKullanici = new User
+                if (_context.Users.Any(u => u.Username == model.UserName))
                 {
-                    Username = model.UserName, // ViewModel'deki isimlendirmene göre
-                    Email = model.Email,
-                    PasswordHash = model.Password, // Not: Gerçek projede şifreyi hashleyerek kaydetmelisin!
+                    ViewBag.Hata = "Bu kullanıcı adı zaten kullanımda.";
+                    return View(model);
+                }
+
+                var yeniKullanici = new User
+                { 
+                    // ViewModel'deki isimlendirmene göre yapıyorum
+                    Username = model.UserName, 
+                    Email = model.Email, 
                     Role = "standard",
                     CreatedAt = DateTime.Now
                 };
+
+                var hasher = new PasswordHasher<User>();
+                yeniKullanici.PasswordHash = hasher.HashPassword(yeniKullanici, model.Password);
 
                 _context.Users.Add(yeniKullanici);
                 _context.SaveChanges();
@@ -118,16 +171,46 @@ namespace FinansUygulmasi.Controllers
             }
             return View(model);
         }
-        private bool KullaniciDogrula(string email, string password)
+        private string RastgeleSifreOlustur()
         {
-            // ŞU AN: Sahte Kontrol (Mock Data)
-            if (email == "admin@finans.com" && password == "1234")
-            {
-                return true;
-            }
-            return false;
+            // Guid benzersiz karmaşık sayılar üretir ve ilk sekizini alırız
+            return Guid.NewGuid().ToString().Substring(0, 8);
         }
 
-        
+        private void MailGonder(string aliciEmail, string yeniSifre)
+        {
+            try
+            {
+                string gonderenEmail = "senin_emailin@gmail.com"; //mesajı yollayacak emaili gir
+                string gonderenSifre = "senin_uygulama_sifren"; // app pasword al
+
+                SmtpClient smtp = new SmtpClient();
+                smtp.Host = "smtp.gmail.com"; // Gmail sunucusu
+                smtp.Port = 587; // Standart port
+                smtp.EnableSsl = true; // Güvenli bağlantı
+                smtp.Credentials = new NetworkCredential(gonderenEmail, gonderenSifre);
+
+                // Mesajı oluştur
+                MailMessage mail = new MailMessage();
+                mail.From = new MailAddress(gonderenEmail, "Finans AI Destek");
+                mail.To.Add(aliciEmail);
+                mail.Subject = "Yeni Şifreniz Oluşturuldu";
+                mail.Body = $@"
+            <h2>Merhaba,</h2>
+            <p>Hesabınız için şifre sıfırlama talebinde bulundunuz.</p>
+            <p><strong>Yeni Şifreniz:</strong> {yeniSifre}</p>
+            <p>Lütfen giriş yaptıktan sonra şifrenizi değiştirmeyi unutmayın.</p>
+            <br>
+            <p>Saygılarımızla,<br>Finans AI Ekibi</p>";
+                mail.IsBodyHtml = true; // HTML formatında gönder
+
+                smtp.Send(mail);
+            }
+            catch (Exception ex)
+            {
+                // Hata olursa loglayabilirsin, şimdilik boş geçiyoruz
+                throw new Exception("Mail gönderilirken hata oluştu: " + ex.Message);
+            }
+        }
     }
 }

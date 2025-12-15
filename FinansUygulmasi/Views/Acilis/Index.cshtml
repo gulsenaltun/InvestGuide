@@ -15,12 +15,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finans AI Geleceği Şekillendir</title>
+    <title>Yatırım Rehberi Geleceği Şekillendir</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /*Tüm sayfaya otomatik uygulanacak olan*/
+
         * {
             margin: 0;
             padding: 0;
@@ -287,7 +287,7 @@
             <div class="symbol-item">
                 <i class="fa-solid fa-coins"></i>
                 <h3>Altın</h3>
-                <small>@(altin != null ? altin.CurrentPrice.ToString("N2"): "Yükleniyor...")</small>
+                <small>@(altin != null ? altin.CurrentPrice.ToString("N2"): "Yükleniyor...")</small> <!--veri gelmezse sayfa patlamasın diye-->
             </div>
             <div class="symbol-item">
                 <i class="fa-solid fa-dollar-sign"></i>

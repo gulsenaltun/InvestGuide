@@ -3,14 +3,6 @@
 
 @{
     Layout = null;
-
-    var ikonlar = new List<string> {
-        "fa-solid fa-bitcoin-sign", "fa-brands fa-ethereum", "fa-solid fa-litecoin-sign",
-        "fa-solid fa-dollar-sign", "fa-solid fa-euro-sign", "fa-solid fa-coins",
-        "fa-solid fa-robot", "fa-solid fa-network-wired", "fa-solid fa-chart-line",
-        "fa-solid fa-shield-halved"
-    };
-    var rnd = new Random();
 }
 
 <!DOCTYPE html>
@@ -18,7 +10,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Şifremi Unuttum</title>
+    <title>Şifremi Unuttum - Yatırım Rehberi</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap">
 
@@ -160,6 +152,7 @@
         <h2>Şifremi Sıfırla</h2>
         <p>Kayıtlı olduğun hesabın e-posta adresini gir. Sana sıfırlama kodu göndereceğiz</p>
 
+        <!--şifremiunuttuma post gönderir-->
         @using (Html.BeginForm("SifremiUnuttum", "Acilis", FormMethod.Post))
         {
             @Html.TextBoxFor(m=>m.Email, new {@class="ozel-input", placeholder="E-posta adresiniz"})            
@@ -168,6 +161,7 @@
             <button type="submit" class="btn-gonder">Kod Gönder</button>
         }
 
+        <!--eposta başarıyla gönderildiyse ekranda mesajı gösterir-->
         @if (TempData["BasariMesaji"] != null)
         {
             <div class="basari-kutusu">
@@ -175,11 +169,13 @@
             </div>
         }
         
+        <!--kullanıcı sisteme kayıtlı değilse hata verir-->
         @if (ViewBag.Hata != null)
         {
             <div class="hata-kutusu">...</div>
         }
 
+        <!--html helpers ile yapabilirdim ancak i etiketi ile ikonun görünmesini istiyorum-->
         <a href="@Url.Action("Giris", "Acilis")" class="geri-don">
             <i class="fa-solid fa-arrow-left"></i>Giriş Ekranına Dön
         </a>
