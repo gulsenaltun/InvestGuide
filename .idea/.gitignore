@@ -1,3 +1,15 @@
-# Default ignored files
+# Visual Studio ve Derleme Klasörleri (Bunlar ASLA yüklenmemeli)
+[Bb]in/
+[Oo]bj/
+.vs/
+.vscode/
+
+# Kullanıcıya özel ayarlar
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Sizin mevcut ayarlarınız
 /shelf/
 /workspace.xml
