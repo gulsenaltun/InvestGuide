@@ -1,0 +1,131 @@
+﻿@model FinansUygulmasi.Models.Entities.User
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Kullanıcı Bilgilerini Güncelle";
+}
+
+<style>
+    /* Formu ortalayan ve şık görünmesini sağlayan ana kutu */
+    .edit-container {
+        max-width: 600px;
+        margin: 3rem auto;
+        background: rgba(255, 255, 255, 0.05); /* Şeffaf arka plan */
+        backdrop-filter: blur(10px); /* Buzlu cam efekti */
+        padding: 2.5rem;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: white;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Form elemanları arasındaki boşluk */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    /* Etiketler (Label) */
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #cbd5e1;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    /* Input kutuları */
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.3); /* Çok koyu şeffaf */
+        color: white;
+        font-size: 1rem;
+        outline: none;
+        transition: border-color 0.3s, background 0.3s;
+    }
+
+        /* Inputa tıklayınca parlasın */
+        .form-control:focus {
+            border-color: #6366f1;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+    /* Kaydet Butonu */
+    .btn-save {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(to right, #facc15, #eab308); /* Sarı tonları */
+        color: #1e1b4b;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: transform 0.2s;
+        margin-top: 1rem;
+    }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(234, 179, 8, 0.3);
+        }
+
+    /* Geri Dön Linki */
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.3s;
+    }
+
+        .back-link:hover {
+            color: white;
+        }
+</style>
+
+<div class="edit-container">
+    <h2 class="gradient-title" style="text-align:center; margin-bottom:2rem; font-size:1.8rem;">
+        ✏️ Kullanıcı Düzenle
+    </h2>
+
+    @using (Html.BeginForm("KullaniciDuzenle", "Admin", FormMethod.Post))
+    {
+        @Html.HiddenFor(m => m.UserId)
+
+        @Html.HiddenFor(m => m.CreatedAt)
+
+        <div class="form-group">
+            <label class="form-label">Kullanıcı Adı</label>
+            @Html.TextBoxFor(m => m.Username, new { @class = "form-control", placeholder = "Kullanıcı adı giriniz" })
+            @Html.ValidationMessageFor(m => m.Username, "", new { style = "color: #ef4444; font-size: 0.8rem;" })
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">E-Posta Adresi</label>
+            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "ornek@mail.com" })
+            @Html.ValidationMessageFor(m => m.Email, "", new { style = "color: #ef4444; font-size: 0.8rem;" })
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Şifre (Değiştirmek istemiyorsanız boş bırakın)</label>
+            @Html.PasswordFor(m => m.PasswordHash, new { @class = "form-control", placeholder = "Yeni şifre...", value = "" })
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Yetki Seviyesi</label>
+            @Html.DropDownListFor(m => m.Role, new List<SelectListItem>
+        {
+        new SelectListItem { Text = "Standart Üye", Value = "standard" },
+        new SelectListItem { Text = "Sistem Yöneticisi (Admin)", Value = "admin" }
+        }, new { @class = "form-control" })
+        </div>
+
+        <button type="submit" class="btn-save">Değişiklikleri Kaydet</button>
+
+        @Html.ActionLink("← Listeye Geri Dön", "Index", "Admin", null, new { @class = "back-link" })
+    }
+</div>

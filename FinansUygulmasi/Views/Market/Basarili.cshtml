@@ -1,0 +1,185 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<style>
+    /* Kapsayıcı ve Merkezleme */
+    .success-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        padding: 2rem;
+    }
+
+    /* Cam Efekti Kart */
+    .success-card {
+        background-color: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 1.5rem; /* rounded-3xl */
+        padding: 3rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        text-align: center;
+        max-width: 32rem; /* max-w-lg */
+        width: 100%;
+        animation: popIn 0.5s ease-out;
+    }
+
+    /* Animasyon */
+    @@keyframes popIn {
+        0%
+
+    {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    }
+
+    /* İkon Alanı */
+    .icon-wrapper {
+        width: 6rem;
+        height: 6rem;
+        background-color: #22c55e; /* Green-500 */
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem auto;
+        box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.5);
+    }
+
+    .check-icon {
+        font-size: 3rem;
+        color: white;
+    }
+
+    /* Başlık ve Metinler */
+    .success-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+    }
+
+    .success-subtitle {
+        font-size: 1.1rem;
+        color: #86efac; /* Green-300 */
+        font-weight: 500;
+        margin-bottom: 2rem;
+    }
+
+    /* Detay Kutusu */
+    .details-box {
+        background-color: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        text-align: left;
+    }
+
+    .detail-text {
+        color: #d1d5db; /* Gray-300 */
+        font-size: 0.95rem;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-subtext {
+        color: #9ca3af; /* Gray-400 */
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Buton */
+    .btn-return {
+        display: block;
+        width: 100%;
+        background-color: #4f46e5; /* Indigo-600 */
+        color: white;
+        font-weight: 700;
+        text-decoration: none;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        transition: background-color 0.2s, transform 0.2s;
+    }
+
+        .btn-return:hover {
+            background-color: #4338ca; /* Indigo-700 */
+            transform: translateY(-2px);
+        }
+
+    .btn-receipt {
+        display: block;
+        width: 100%;
+        background-color: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #d1d5db;
+        font-weight: 600;
+        text-decoration: none;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        margin-top: 1rem;
+        transition: all 0.2s;
+    }
+
+        .btn-receipt:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: white;
+        }
+</style>
+
+<div class="success-container">
+    <div class="success-card">
+
+        <div class="icon-wrapper">
+            <i class="fas fa-check check-icon"></i>
+        </div>
+
+        <h2 class="success-title">İşlem Başarılı!</h2>
+        <p class="success-subtitle">@(ViewBag.Mesaj ?? "İşleminiz başarıyla gerçekleştirildi.")</p>
+
+        @if (ViewBag.Detay != null)
+        {
+            <div class="details-box">
+                <p class="detail-text">
+                    <i class="fas fa-info-circle" style="color: #60a5fa;"></i>
+                    İşlem Özeti: Başarılı
+                </p>
+                <p class="detail-subtext">
+                    <i class="fas fa-receipt" style="color: #9ca3af;"></i>
+                    @ViewBag.Detay
+                </p>
+            </div>
+        }
+
+        <div>
+            @Html.ActionLink("Piyasaya Dön", "Altin", "Market", null, new { @class = "btn-return" })
+
+            @Html.ActionLink("Dekont Görüntüle / Yazdır", "Receipt", "Market",
+                     new
+                     {
+                         symbol = ViewBag.Symbol,
+                         miktar = ViewBag.Miktar,
+                         fiyat = ViewBag.Fiyat,
+                         toplam = ViewBag.Toplam,
+                         islemTuru = ViewBag.IslemTuru,
+                         tarih = ViewBag.Tarih
+                     },
+                     new { @class = "btn-receipt", target = "_blank" })
+        </div>
+    </div>
+</div>

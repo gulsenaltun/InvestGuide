@@ -1,0 +1,77 @@
+﻿@{
+
+    var ikonlar = new List<string> {
+        "fa-solid fa-bitcoin-sign", "fa-brands fa-ethereum", "fa-solid fa-litecoin-sign",
+        "fa-solid fa-dollar-sign", "fa-solid fa-euro-sign", "fa-solid fa-coins",
+        "fa-solid fa-robot", "fa-solid fa-network-wired", "fa-solid fa-chart-line",
+        "fa-solid fa-shield-halved"
+    };
+
+    var rnd = new Random();
+}
+
+<!--Arka plana ait css kodlarım neredeyse çoğunda ortak -->
+<style>
+    .arka-plan-izgara {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+        z-index: 0;
+    }
+
+    .ucan-simge {
+        position: absolute;
+        bottom: -150px;
+        color: #ffd700;
+        text-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        z-index: 0;
+        opacity: 0;
+        pointer-events: none;
+        animation-name: yukari-suzulme;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+    }
+
+    @@keyframes yukari-suzulme {
+    0%{
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.7;
+    }
+
+    90% {
+        opacity: 0.7;
+    }
+
+    100% {
+        transform: translateY(-120vh) rotate(360deg);
+        opacity: 0;
+    }
+
+    }
+</style>
+
+<!-- arka plan için html yapısı -->
+<div class="arka-plan-izgara"></div>
+
+@foreach (var ikonAdi in ikonlar)
+{
+    var solKonum = rnd.Next(1, 98);
+    var hiz = rnd.Next(4, 12);
+    var gecikme = rnd.Next(-10, 3);
+    var boyut = (rnd.Next(15, 40) / 10.0).ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    <i class="@ikonAdi ucan-simge"
+       style="left: @(solKonum)%;
+              animation-duration: @(hiz)s;
+              animation-delay: @(gecikme)s;
+              font-size: @(boyut)rem;">
+    </i>
+}

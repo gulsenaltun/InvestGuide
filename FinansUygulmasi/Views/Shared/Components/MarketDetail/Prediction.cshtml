@@ -1,0 +1,214 @@
+﻿@using FinansUygulmasi.Models.ViewModels
+@model MarketDetailViewModel
+
+@{
+    Layout = null; // Eğer bir layout içinde çağıracaksanız bunu kaldırın
+
+    // Tema Rengi Belirleme
+    string themeColor = "#818cf8"; // Varsayılan İndigo
+    string glowColor = "rgba(129, 140, 248, 0.2)";
+
+    if (Model.PredictionDirection == "Yukselis")
+    {
+        themeColor = "#4ade80"; // Yeşil
+        glowColor = "rgba(74, 222, 128, 0.2)";
+    }
+    else if (Model.PredictionDirection == "Dusus")
+    {
+        themeColor = "#f87171"; // Kırmızı
+        glowColor = "rgba(248, 113, 113, 0.2)";
+    }
+}
+
+<style>
+    .ai-dashboard {
+        font-family: 'Segoe UI', sans-serif;
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 1.5rem;
+        border: 1px solid rgba(255,255,255,0.1);
+        max-width: 800px;
+        margin: 0 auto;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+
+    .bg-glow {
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, @themeColor 0%, transparent 70%);
+        opacity: 0.15;
+        filter: blur(60px);
+        pointer-events: none;
+    }
+
+    /* Header Alanı */
+    .dashboard-header {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .coin-icon-box {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 1rem;
+        background: rgba(255,255,255,0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: @themeColor;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .header-info h2 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .header-info span {
+        color: #94a3b8;
+        font-size: 0.9rem;
+    }
+    
+    .dashboard-content {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    /* Fiyat Kartı */
+    .metric-card {
+        background: rgba(255,255,255,0.03);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(255,255,255,0.05);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background-color: @themeColor;
+        }
+
+    .price-label {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        letter-spacing: 1px;
+    }
+
+    .price-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        font-family: monospace;
+        margin-bottom: 10px;
+    }
+
+    .direction-tag {
+        display: inline-block;
+        align-items: center;
+        gap: 8px;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.9rem;
+        font-weight: 700;
+        background: @glowColor;
+        color: @themeColor;
+        border: 1px solid @themeColor;
+    }
+
+    /* Güven Skoru */
+    .confidence-wrapper {
+        background: rgba(255,255,255,0.02);
+        padding: 1rem;
+        border-radius: 0.8rem;
+    }
+
+    .conf-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.8rem;
+        font-size: 0.9rem;
+        color: #cbd5e1;
+    }
+
+    .progress-track {
+        height: 8px;
+        background: #334155;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: @themeColor;
+        border-radius: 4px;
+        transition: width 1s ease;
+        box-shadow: 0 0 10px @themeColor;
+    }
+
+</style>
+
+<div class="ai-dashboard">
+    <div class="bg-glow"></div>
+
+    <div class="dashboard-header">
+        <div class="coin-icon-box">
+            <i class="fas @Model.IconClass"></i>
+        </div>
+        <div class="header-info">
+            <h2>@Model.Name Tahmini</h2>
+            <span>Yapay Zeka Tahmini</span>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        
+            <div class="metric-card">
+                <div class="price-label">24 SAATLİK TAHMİN</div>
+                <div class="price-value">@Model.PredictedPrice.ToString("N2") ₺</div>
+
+                <div class="direction-tag">
+                    @if (Model.PredictionDirection == "Yukselis")
+                    {
+                        <i class="fas fa-arrow-trend-up"></i> <span>YÜKSELİŞ BEKLENTİSİ</span>
+                    }
+                    else
+                    {
+                        <i class="fas fa-arrow-trend-down"></i> <span>DÜŞÜŞ RİSKİ</span>
+                    }
+                </div>
+            </div>
+
+            <div class="confidence-wrapper">
+                <div class="conf-header">
+                    <span>Model Güven Skoru</span>
+                    <strong>%@Model.ConfidenceScore</strong>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width: @Model.ConfidenceScore%"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

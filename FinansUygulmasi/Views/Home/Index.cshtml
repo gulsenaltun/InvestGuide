@@ -1,0 +1,123 @@
+﻿@using FinansUygulmasi.Controllers
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Piyasa Paneli";
+}
+
+<style>
+    .paper-wrapper{
+        width: 100%;
+        padding-bottom: 2.5rem;
+    }
+
+    .main-container{
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 2.5rem 1rem;
+    }
+
+    .header-section{
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .gradient-title{
+        font-size: 2.25rem;
+        font-weight: 800;
+        margin-bottom: 0.75rem;
+        background: linear-gradient(to right, #f472b6, #c084fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .subtitle{
+        color: #c7d2fe;
+        opacity: 0.8;
+        font-size: 1rem;
+    }
+
+    .dashboard-grid{
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    @@media(min-width: 1024px)
+    {
+        .dashboard-grid{
+            grid-template-columns: 7fr 5fr;
+        }
+    }
+
+    .currency-section, .massage-section {
+        width: 100%;
+    }
+
+    .market-closed-alert {
+        background: rgba(239, 68, 68, 0.1); /* Kırmızı transparan zemin */
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fca5a5; /* Açık kırmızı yazı */
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-weight: 600;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @@keyframes fadeIn {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+</style>
+
+<div class="paper-wrapper">
+
+    <div class="main-container">
+
+        @if (AdminController.MarketErisimiAcik == false)
+        {
+            <div class="market-closed-alert">
+                <i class="fa-solid fa-lock"></i>
+                <span>Piyasa verileri şu an yönetici tarafından erişime kapatılmıştır. İşlem yapılamaz.</span>
+            </div>
+        }
+
+        <div class="header-section">
+            <h2 class="gradient-title">
+                Piyasa Özeti
+            </h2>
+            <p class="subtitle">Anlık döviz kurları ve topluluk analizleri</p>
+        </div>
+
+        <div class="dashboard-grid">
+
+            <div class="currency-section">
+                @await Component.InvokeAsync("DovizKurlari")
+            </div>
+
+            <div class="message-section">
+                @await Component.InvokeAsync("SonMesajlar")
+            </div>
+
+        </div>
+    </div>
+</div>

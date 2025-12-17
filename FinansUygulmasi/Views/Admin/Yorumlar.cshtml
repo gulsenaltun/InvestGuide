@@ -1,0 +1,305 @@
+﻿@using FinansUygulmasi.Models.ViewModels
+@model List<MesajViewModel>
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Yorum Denetimi";
+}
+
+<style>
+    /* --- TEMEL KART YAPISI (GLASSMORPHISM) --- */
+    .review-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .review-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+    /* --- BAŞLIK ALANI (FLEXBOX) --- */
+    .card-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        flex-wrap: wrap; /* Mobilde taşarsa aşağı insin */
+        gap: 10px;
+    }
+
+    .topic-badge {
+        background: rgba(99, 102, 241, 0.15);
+        color: #818cf8;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid rgba(99, 102, 241, 0.25);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* --- KULLANICI BİLGİSİ VE BUTON --- */
+    .user-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 16px;
+        margin-bottom: 16px;
+        gap: 15px;
+    }
+
+    .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .user-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        object-fit: cover;
+    }
+
+    .user-meta {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-name {
+        font-weight: 700;
+        color: #f8fafc;
+        font-size: 1.05rem;
+    }
+
+    .msg-date {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        margin-top: 2px;
+    }
+
+    /* --- ANA YORUM METNİ --- */
+    .main-comment {
+        color: #e2e8f0;
+        font-size: 1rem;
+        line-height: 1.7;
+        margin-bottom: 24px;
+        font-weight: 400;
+    }
+
+    /* --- YANITLAR (REPLIES) KUTUSU --- */
+    .replies-container {
+        background: rgba(0, 0, 0, 0.3); /* Koyu zemin */
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .replies-header {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #64748b;
+        margin-bottom: 16px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .reply-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        gap: 15px;
+    }
+
+        .reply-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+    .reply-content {
+        flex: 1;
+    }
+
+    .reply-user {
+        font-weight: 600;
+        color: #60a5fa; /* Mavi ton */
+        font-size: 0.9rem;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .reply-text {
+        color: #cbd5e1;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    /* --- BUTONLAR --- */
+    .btn-delete-main {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .btn-delete-main:hover {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+    .btn-delete-sm {
+        background: rgba(255, 255, 255, 0.05);
+        color: #94a3b8;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.8rem;
+        text-decoration: none;
+        transition: all 0.2s;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .btn-delete-sm:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+    /* --- MOBİL UYUMLULUK (RESPONSIVE) --- */
+    @@media (max-width: 768px) {
+        .user-section {
+            flex-direction: column; /* Alt alta diz */
+            align-items: stretch;
+        }
+
+        .btn-delete-main {
+            justify-content: center; /* Butonu ortala */
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .reply-item {
+            flex-direction: column; /* Yanıtı ve sil butonunu alt alta al */
+            gap: 10px;
+        }
+
+        .btn-delete-sm {
+            align-self: flex-start; /* Butonu sola yasla */
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+        }
+
+        .review-card {
+            padding: 16px; /* Mobilde paddingi azalt */
+        }
+    }
+</style>
+
+<div style="max-width: 1000px; margin: 0 auto; padding-bottom: 50px;">
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 30px; flex-wrap: wrap; gap:10px;">
+        <h2 class="gradient-title" style="margin:0; font-size: 2rem;">🛡️ Yorum Denetimi</h2>
+        <span style="background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; color: #cbd5e1;">
+            Toplam: <strong>@Model.Count</strong> Yorum
+        </span>
+    </div>
+
+    @if (TempData["Mesaj"] != null)
+    {
+        <div style="background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 16px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(16, 185, 129, 0.3); display:flex; align-items:center; gap:12px; font-weight:500;">
+            <i class="fas fa-check-circle"></i> @TempData["Mesaj"]
+        </div>
+    }
+
+    @if (TempData["Hata"] != null)
+    {
+        <div style="background: rgba(239, 68, 68, 0.2); color: #f87171; padding: 16px; border-radius: 12px; margin-bottom: 25px; border: 1px solid rgba(239, 68, 68, 0.3); display:flex; align-items:center; gap:12px; font-weight:500;">
+            <i class="fas fa-exclamation-triangle"></i> @TempData["Hata"]
+        </div>
+    }
+
+    @foreach (var item in Model)
+    {
+        <div class="review-card">
+
+            <div class="card-header-top">
+                <div class="topic-badge">
+                    <i class="fas fa-layer-group"></i> Konu: @item.KonuBasligi
+                </div>
+            </div>
+
+            <div class="user-section">
+                <div class="user-profile">
+                    <img src="@item.AvatarUrl" class="user-avatar" alt="User" />
+                    <div class="user-meta">
+                        <span class="user-name">@item.KullaniciAdi</span>
+                        <span class="msg-date"><i class="far fa-clock"></i> @item.TarihFormatli</span>
+                    </div>
+                </div>
+
+                @Html.ActionLink("Ana Yorumu Sil", "YorumSil", "Admin",
+                         new { konuId = item.Id, yorumId = item.YorumId },
+                         new { @class = "btn-delete-main", onclick = "return confirm('Bu işlemi onaylıyor musun? Yorum ve altındaki tüm cevaplar silinecek!')" })
+            </div>
+
+            <div class="main-comment">
+                @item.Icerik
+            </div>
+
+            @if (item.Yanitlar != null && item.Yanitlar.Count > 0)
+            {
+                <div class="replies-container">
+                    <div class="replies-header">
+                        <i class="fas fa-reply-all"></i> Tartışma / Cevaplar (@item.Yanitlar.Count)
+                    </div>
+
+                    @foreach (var yanit in item.Yanitlar)
+                    {
+                        <div class="reply-item">
+                            <div class="reply-content">
+                                <span class="reply-user">
+                                    @yanit.KullaniciAdi
+                                    <span style="font-weight:400; color:#64748b; font-size:0.8rem; margin-left: 5px;">• @yanit.TarihFormatli</span>
+                                </span>
+                                <div class="reply-text">@yanit.Icerik</div>
+                            </div>
+
+                            @Html.ActionLink("Sil", "YanitSil", "Admin",
+                                     new { konuId = item.Id, anaYorumId = item.YorumId, yanitIcerik = yanit.Icerik },
+                                     new { @class = "btn-delete-sm", title = "Bu cevabı kaldır", onclick = "return confirm('Sadece bu cevabı silmek istiyor musun?')" })
+                        </div>
+                    }
+                </div>
+            }
+
+        </div>
+    }
+</div>

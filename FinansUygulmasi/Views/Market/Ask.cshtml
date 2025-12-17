@@ -1,0 +1,7 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<div style="padding: 4rem 1rem; min-height: 85vh; display: flex; align-items: center; justify-content: center;">
+    @await Component.InvokeAsync("MarketDetail", new { symbol = ViewBag.Symbol, sablon = "Prediction" })
+</div>

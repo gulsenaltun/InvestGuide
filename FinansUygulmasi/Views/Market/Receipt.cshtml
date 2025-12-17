@@ -1,0 +1,201 @@
+﻿@{
+    Layout = null; // Dekontta menü/footer olmasın, sadece kağıt olsun
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>İşlem Dekontu - Finans AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f3f4f6; /* Gri arka plan */
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 40px;
+            color: #1f2937;
+        }
+
+        .receipt-paper {
+            background-color: white;
+            width: 100%;
+            max-width: 600px;
+            padding: 40px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            border-top: 10px solid #4f46e5; /* İndigo Çizgi */
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111;
+        }
+
+        .receipt-title {
+            font-size: 1.25rem;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-item label {
+            display: block;
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .info-item span {
+            display: block;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111;
+        }
+
+        .total-section {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: right;
+            margin-top: 20px;
+        }
+
+        .total-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .total-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4f46e5;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            border-top: 1px dashed #e5e7eb;
+            padding-top: 20px;
+        }
+
+        /* Yazdırma Butonu (Sadece ekranda görünür) */
+        .print-btn-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn-print {
+            background-color: #1f2937;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Yazıcıda Butonu ve Arka Planı Gizle */
+        @@media print {
+            body
+
+        {
+            background-color: white;
+            padding: 0;
+        }
+
+        .receipt-paper {
+            box-shadow: none;
+            border-top: none;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .print-btn-container {
+            display: none;
+        }
+
+        }
+    </style>
+</head>
+<body>
+
+    <div class="receipt-paper">
+        <div class="header">
+            <div class="logo">🤖 Finans AI</div>
+            <div class="receipt-title">İşlem Dekontu</div>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-item">
+                <label>İşlem Numarası</label>
+                <span>@ViewBag.IslemNo</span>
+            </div>
+            <div class="info-item">
+                <label>İşlem Tarihi</label>
+                <span>@ViewBag.Tarih</span>
+            </div>
+            <div class="info-item">
+                <label>İşlem Türü</label>
+                <span>@ViewBag.IslemTuru</span>
+            </div>
+            <div class="info-item">
+                <label>Varlık</label>
+                <span>@ViewBag.Symbol</span>
+            </div>
+            <div class="info-item">
+                <label>Birim Fiyat</label>
+                <span>@string.Format("{0:N2} ₺", ViewBag.Fiyat)</span>
+            </div>
+            <div class="info-item">
+                <label>Miktar</label>
+                <span>@ViewBag.Miktar</span>
+            </div>
+        </div>
+
+        <div class="total-section">
+            <span class="total-label">TOPLAM TUTAR</span>
+            <div class="total-amount">@string.Format("{0:N2} ₺", ViewBag.Toplam)</div>
+        </div>
+
+        <div class="footer">
+            Bu belge Finans AI tarafından elektronik ortamda oluşturulmuştur. Islak imza gerektirmez.<br>
+            Finans AI Yatırım Hizmetleri A.Ş.
+        </div>
+
+        <div class="print-btn-container">
+            <button onclick="window.print()" class="btn-print">Yazdır / PDF Olarak Kaydet</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            // Kullanıcı sayfayı görünce otomatik yazdır penceresi açılsın
+            setTimeout(function() { window.print(); }, 500);
+        };
+    </script>
+
+</body>
+</html>

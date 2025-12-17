@@ -1,0 +1,186 @@
+﻿@using FinansUygulmasi.Models.ViewModels
+@model KonuOlusturViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Yeni Konu Başlat";
+
+    var varlikListesi = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "🌍 Genel Sohbet", Value = "GENEL" },
+        new SelectListItem { Text = "₿ Bitcoin (BTC)", Value = "BTC" },
+        new SelectListItem { Text = "€ Euro(EUR)", Value = "ETH" },
+        new SelectListItem { Text = "💵 Dolar (USD)", Value = "USD" },
+        new SelectListItem { Text = "🟡 Altın (Gram)", Value = "GA" }
+    };
+}
+
+<style>
+    /* Tasarım kodların aynen kalacak */
+    .forum-create-container {
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
+
+    .form-card {
+        background-color: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2.5rem;
+        border-radius: 1.5rem;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        width: 100%;
+        max-width: 700px;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .form-title {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(to right, #facc15, #ea580c);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        display: inline-block;
+    }
+
+    .form-subtitle {
+        color: #9ca3af;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        color: #d1d5db;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-input {
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.8rem;
+        padding: 0.8rem 1rem;
+        color: #ffffff;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.3s ease;
+    }
+
+        .form-input::placeholder {
+            color: #6b7280;
+        }
+
+        .form-input:focus {
+            border-color: #facc15;
+            box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.3);
+        }
+
+    select.form-input {
+        appearance: none;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+        background-position: right 1rem center;
+        background-repeat: no-repeat;
+        background-size: 1.5em 1.5em;
+    }
+
+    .validation-msg {
+        display: block;
+        color: #f87171;
+        font-size: 0.8rem;
+        margin-top: 0.3rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 0.8rem 1.5rem;
+        border-radius: 0.8rem;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-cancel {
+        flex: 1;
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+
+        .btn-cancel:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+
+    .btn-submit {
+        flex: 2;
+        background: linear-gradient(to right, #eab308, #ea580c);
+        color: #fff;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+
+        .btn-submit:hover {
+            background: linear-gradient(to right, #facc15, #f97316);
+            box-shadow: 0 10px 15px -3px rgba(234, 88, 12, 0.3);
+            transform: translateY(-2px);
+        }
+</style>
+
+<div class="forum-create-container">
+    <div class="form-card">
+        <div class="form-header">
+            <h2 class="form-title">📢 Sesini Duyur</h2>
+            <p class="form-subtitle">Finans piyasaları hakkında bir tartışma başlat.</p>
+        </div>
+
+        @using (Html.BeginForm("Olustur", "Forum", FormMethod.Post))
+        {
+            <div class="form-group">
+                @Html.LabelFor(m => m.VarlıkTag, new { @class = "form-label" })
+                @Html.DropDownListFor(m => m.VarlıkTag, varlikListesi, new { @class = "form-input" })
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(m => m.Baslik, new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.Baslik, new { @class = "form-input", placeholder = "Örn: 2025'te Altın ne olur?", autocomplete = "off" })
+                @Html.ValidationMessageFor(m => m.Baslik, "", new { @class = "validation-msg" })
+            </div>
+
+            <div class="form-group" style="margin-bottom: 2rem;">
+                @Html.LabelFor(m => m.Icerik, new { @class = "form-label" })
+                @Html.TextAreaFor(m => m.Icerik, new { @class = "form-input", rows = "6", placeholder = "Fikirlerini detaylıca yaz..." })
+                @Html.ValidationMessageFor(m => m.Icerik, "", new { @class = "validation-msg" })
+            </div>
+
+            <div class="form-actions">
+                <a href="/Forum/Index" class="btn btn-cancel">İptal</a>
+                <button type="submit" class="btn btn-submit">🚀 Tartışmayı Başlat</button>
+            </div>
+        }
+    </div>
+</div>
