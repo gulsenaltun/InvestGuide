@@ -209,15 +209,14 @@ namespace FinansUygulmasi.Controllers
             _context.SaveChanges();
 
             // 5. Bilgi Ekranı
-            ViewBag.IslemNo = siparisNo;
-            ViewBag.Tarih = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
-            ViewBag.Symbol = model.Symbol;
-            ViewBag.Miktar = model.Amount;
-            ViewBag.Fiyat = guncelFiyat;
-            ViewBag.Toplam = toplamTutar;
-            ViewBag.Detay = $"Yeni Nakit Bakiyeniz: {wallet.Balance:N2} ₺";
-
-            return View("Basarili");
+            return RedirectToAction("Receipt", new
+            {
+                symbol = model.Symbol,
+                miktar = model.Amount,
+                fiyat = guncelFiyat,
+                toplam = toplamTutar,
+                islemTuru = islemTuru
+            });
         }
 
         private ContentResult MarketKapaliMesaji()
@@ -250,7 +249,7 @@ namespace FinansUygulmasi.Controllers
             if (AdminController.MarketErisimiAcik == false)
             {
                 // İstersen burada "MarketKapaliMesaji()" metodunu da çağırabilirsin
-                return RedirectToAction("Index");
+                return RedirectToAction("Index"); 
             }
 
             // 2. Sembol boş geldiyse ana sayfaya at

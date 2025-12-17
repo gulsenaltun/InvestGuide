@@ -2,11 +2,13 @@
 
 @{
     Layout = "_Layout";
-    string symbol = Model.Symbol;
-    decimal fiyat = Model.CurrentPrice;
+    // Controller'dan gelen "Sahip Olunan Miktar" verisini alıyoruz.
+    // Eğer null gelirse (hata olmasın diye) 0 kabul ediyoruz.
+    decimal sahipOlunan = ViewBag.SahipOlunan != null ? (decimal)ViewBag.SahipOlunan : 0;
 }
 
 <style>
+    /* GENEL SAYFA DÜZENİ */
     .sell-container {
         display: flex;
         align-items: center;
@@ -14,6 +16,7 @@
         min-height: 80vh;
     }
 
+    /* KART TASARIMI (CAM EFEKTİ) */
     .sell-card {
         width: 100%;
         max-width: 28rem;
@@ -27,6 +30,7 @@
         overflow: hidden;
     }
 
+    /* ARKA PLAN KIRMIZI BULANIKLIK */
     .bg-blur-red {
         position: absolute;
         top: -2.5rem;
@@ -40,6 +44,7 @@
         pointer-events: none;
     }
 
+    /* BAŞLIK ALANI */
     .header-area {
         text-align: center;
         margin-bottom: 2rem;
@@ -82,12 +87,10 @@
         color: white;
     }
 
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
+    /* INPUT ETİKETLERİ */
     .input-label {
-        display: block;
+        display: flex;
+        justify-content: space-between;
         font-size: 0.875rem;
         font-weight: 500;
         color: #d1d5db;
@@ -95,10 +98,19 @@
         margin-left: 0.25rem;
     }
 
+    /* MEVCUT BAKİYE YAZISI (TIKLANABİLİR) */
+    .balance-info {
+        color: #f87171;
+        font-size: 0.8rem;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
     .sell-input-wrapper {
         position: relative;
     }
 
+    /* INPUT ALANI */
     .sell-input {
         width: 100%;
         background-color: rgba(0, 0, 0, 0.3);
@@ -116,6 +128,12 @@
             border-color: #ef4444;
         }
 
+    /* HATA DURUMUNDA INPUT GÖRÜNÜMÜ */
+    .input-error {
+        border-color: #ff0000 !important;
+        color: #ff0000 !important;
+    }
+
     .suffix-text {
         position: absolute;
         right: 1rem;
@@ -124,6 +142,7 @@
         color: #6b7280;
     }
 
+    /* ÖZET KUTUSU */
     .summary-box {
         background-color: rgba(239, 68, 68, 0.1);
         border-radius: 0.75rem;
@@ -149,6 +168,7 @@
         font-family: monospace;
     }
 
+    /* BUTON */
     .btn-sell-confirm {
         width: 100%;
         background: linear-gradient(to right, #dc2626, #ef4444);
@@ -166,11 +186,29 @@
             background: linear-gradient(to right, #ef4444, #f87171);
             transform: translateY(-2px);
         }
+
+    /* BUTON PASİF HALİ */
+    .btn-disabled {
+        background: #4b5563 !important;
+        cursor: not-allowed !important;
+        opacity: 0.7;
+    }
+
+    /* Chrome, Safari, Edge ve Opera için okları kaldırır */
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox için okları kaldırır */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
 </style>
 
 <div class="sell-container">
     <div class="sell-card">
-
         <div class="bg-blur-red"></div>
 
         <div class="header-area">
@@ -179,17 +217,32 @@
             </div>
             <h2 class="sell-title">@Model.Symbol <span class="text-red">BOZDUR</span></h2>
             <p class="sell-subtitle">Satış Kuru: <span class="font-mono">@Model.CurrentPrice.ToString("N2") ₺</span></p>
+
+            @if (TempData["Hata"] != null)
+            {
+                <div style="color: #ff4444; background: rgba(255,0,0,0.1); padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.9rem;">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["Hata"]
+                </div>
+            }
         </div>
 
-        @using (Html.BeginForm("IslemTamamla", "Market", FormMethod.Post, new { style = "position: relative; z-index: 10; display: flex; flex-direction: column; gap: 1.5rem;" }))
+        @* Form başlangıcı. onsubmit="return satisOnayi()" sayesinde JS onayı almadan form gönderilmez. *@
+        @using (Html.BeginForm("IslemTamamla", "Market", FormMethod.Post, new { id = "satisFormu", onsubmit = "return satisOnayi()", style = "position: relative; z-index: 10; display: flex; flex-direction: column; gap: 1.5rem;" }))
         {
-            @Html.HiddenFor(m=>m.Symbol)
+            @Html.HiddenFor(m => m.Symbol)
             @Html.Hidden("islemTuru", "Satis")
 
             <div>
-                <label class="input-label">Satılacak Miktar</label>
+                <div class="input-label">
+                    <span>Satılacak Miktar</span>
+                    @* Kullanıcı buna tıklarsa tüm parası kutuya dolar *@
+                    <span class="balance-info" onclick="hepsiniSec()" title="Tümünü seçmek için tıkla">
+                        Mevcut: @sahipOlunan.ToString("N4")
+                    </span>
+                </div>
+
                 <div class="sell-input-wrapper">
-                    @Html.TextBoxFor(m=>m.Amount, new
+                    @Html.TextBoxFor(m => m.Amount, new
                         {
                             @class = "sell-input",
                             type = "number",
@@ -197,10 +250,21 @@
                             id = "miktar",
                             placeholder = "0.00",
                             required = "required",
-                            oninput = "hesapla()"
+                            autocomplete = "off",
+                            // HTML tarafında da max sınırını koyuyoruz
+                            max = sahipOlunan.ToString(System.Globalization.CultureInfo.InvariantCulture),
+
+                            oninput = "hesapla()",
+                            onfocus = "if(this.value==0) { this.value = ''; }",
+                            onclick = "if(this.value==0) { this.value = ''; }",
+
+                            // Açılışta 0 ise boş gelmesi için:
+                            @Value = (Model.Amount == 0 ? "" : Model.Amount.ToString().Replace(",", "."))
                         })
                     <span class="suffix-text">@Model.Symbol</span>
                 </div>
+
+                <div id="hata-mesaji" style="color: #ef4444; font-size: 0.8rem; margin-top: 5px; min-height: 1.2rem;"></div>
             </div>
 
             <div class="summary-box">
@@ -208,7 +272,7 @@
                 <span class="summary-value" id="toplam">0,00 ₺</span>
             </div>
 
-            <button type="submit" class="btn-sell-confirm">
+            <button type="submit" id="btn-submit" class="btn-sell-confirm">
                 SATIŞI ONAYLA
             </button>
         }
@@ -216,11 +280,74 @@
 </div>
 
 <script>
+    // Server'dan gelen sayıları JS formatına (nokta) uygun şekilde alıyoruz
+    const sahipOlunanMiktar = @sahipOlunan.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    const anlikFiyat = @Model.CurrentPrice.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
     function hesapla() {
-        const miktar = document.getElementById('miktar').value.replace(',', '.');
-        const fiyat = @Model.CurrentPrice.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        const toplam = miktar * fiyat;
-        document.getElementById('toplam').innerText =
-            new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(toplam);
+        const miktarInput = document.getElementById('miktar');
+        // Virgül girilirse noktaya çevir
+        const miktarDegeri = miktarInput.value.replace(',', '.');
+        const btnSubmit = document.getElementById('btn-submit');
+        const hataMesaji = document.getElementById('hata-mesaji');
+        const toplamText = document.getElementById('toplam');
+
+        let girilenMiktar = parseFloat(miktarDegeri);
+
+        // 1. KONTROL: Geçersiz veya Negatif sayı
+        if (isNaN(girilenMiktar) || girilenMiktar < 0) {
+            toplamText.innerText = "0,00 ₺";
+            return;
+        }
+
+        // 2. KONTROL: Bakiye Yeterli mi?
+        // JS tarafında küçük bir tolerans (0.000001) bırakılabilir float hataları için
+        if (girilenMiktar > sahipOlunanMiktar) {
+            hataMesaji.innerText = "Yetersiz Bakiye! En fazla " + sahipOlunanMiktar + " satabilirsiniz.";
+            hataMesaji.style.fontWeight = "bold";
+            miktarInput.classList.add("input-error");
+
+            // Butonu kilitle
+            btnSubmit.classList.add("btn-disabled");
+            btnSubmit.disabled = true;
+        } else {
+            // Her şey yolundaysa temizle
+            hataMesaji.innerText = "";
+            miktarInput.classList.remove("input-error");
+
+            // Butonu aç
+            btnSubmit.classList.remove("btn-disabled");
+            btnSubmit.disabled = false;
+        }
+
+        // Fiyat Hesaplama ve Ekrana Yazma
+        const toplam = girilenMiktar * anlikFiyat;
+
+        // Türkçe para formatı (TL simgesi ve binlik ayıraç)
+        toplamText.innerText = new Intl.NumberFormat('tr-TR', {
+            style: 'currency',
+            currency: 'TRY'
+        }).format(toplam);
+    }
+
+    // "Mevcut: X" yazısına tıklayınca çalışır
+    function hepsiniSec() {
+        const kutu = document.getElementById('miktar');
+        kutu.value = sahipOlunanMiktar;
+        // Kutuyu doldurduktan sonra hesaplamayı tetikle ki toplam tutar güncellensin
+        hesapla();
+    }
+
+    // Form gönderilmeden hemen önce tarayıcı sorar
+    function satisOnayi() {
+        const girilen = document.getElementById('miktar').value;
+
+        if(girilen == "" || girilen == 0) {
+            alert("Lütfen geçerli bir miktar giriniz.");
+            return false; // Gönderme
+        }
+
+        // Onay kutusu çıkar
+        return confirm(girilen + " adet @Model.Symbol satmak üzeresiniz. \n\nBu işlem geri alınamaz. Onaylıyor musunuz?");
     }
 </script>

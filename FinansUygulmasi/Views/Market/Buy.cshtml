@@ -2,15 +2,11 @@
 
 @{
     Layout = "_Layout";
-    string symbol = Model.Symbol;
-    decimal fiyat = Model.CurrentPrice;
-    decimal bakiye = Model.WalletBalance;
+    // Cüzdan bakiyesini değişkene alıyoruz
+    decimal cuzdanBakiyesi = Model.WalletBalance;
 }
 
 <style>
-    body{
-        overflow: hidden;
-    }
 
     .page-container {
         display: flex;
@@ -49,18 +45,22 @@
     }
 
     @@media(min - width: 768px)
+
     {
-        .buy-card {
-            flex-direction: row;
-        }
+        .buy-card
 
-        .left-panel {
-            width: 50%;
-        }
+    {
+        flex-direction: row;
+    }
 
-        .right-panel{
-            width: 50%;
-        }
+    .left-panel {
+        width: 50%;
+    }
+
+    .right-panel {
+        width: 50%;
+    }
+
     }
 
     .input-field {
@@ -71,6 +71,13 @@
         color: white;
         font-size: 1.25rem;
         border-radius: 0.75rem;
+        outline: none;
+    }
+
+    /* Hata durumunda kırmızı çerçeve */
+    .input-error {
+        border-color: #ff4444 !important;
+        color: #ff4444 !important;
     }
 
     .btn-submit {
@@ -83,6 +90,13 @@
         border-radius: 0.75rem;
         border: none;
         cursor: pointer;
+    }
+
+    /* Buton Pasif Hali */
+    .btn-disabled {
+        background: #4b5563 !important; /* Gri renk */
+        cursor: not-allowed !important;
+        opacity: 0.7;
     }
 
     .wallet-box {
@@ -114,7 +128,7 @@
         display: inline-block;
     }
 
-    .total-display{
+    .total-display {
         margin-top: 1rem;
         padding: 1rem;
         background: rgba(255,255,255,0.05);
@@ -122,15 +136,9 @@
         border: 1px dashed rgba(255,255,255,0.2);
     }
 
-    .total-label{
+    .total-label {
         color: #9ca3af;
         font-size: 0.85rem;
-    }
-
-    .total-value{
-        color: #4ade80;
-        font-size: 1.5rem;
-        font-weight: bold;
     }
 
     /* Chrome, Safari, Edge ve Opera için okları kaldırır */
@@ -147,9 +155,10 @@
 </style>
 
 <div class="page-container">
-    @using (Html.BeginForm("IslemTamamla", "Market", FormMethod.Post, new { @class = "buy-card" }))
+    @* Form başlangıcı: onsubmit eklendi *@
+    @using (Html.BeginForm("IslemTamamla", "Market", FormMethod.Post, new { @class = "buy-card", onsubmit = "return alisOnayi()" }))
     {
-        @Html.HiddenFor(m=>m.Symbol)
+        @Html.HiddenFor(m => m.Symbol)
         @Html.Hidden("islemTuru", "Alis")
 
         <div class="left-panel">
@@ -158,18 +167,24 @@
 
             <div style="margin-bottom: 1.5rem;">
                 <label style="color:#d1d5db; display:block; margin-bottom:0.5rem;">Alınacak Miktar</label>
-                @Html.TextBoxFor(m=>m.Amount, new
+                @Html.TextBoxFor(m => m.Amount, new
                     {
                         @class = "input-field",
                         type = "number",
                         step = "any",
                         id = "miktar",
                         required = "required",
-                        oninput = "hesapla()", //her tuşa basışında hesaplaması için
+                        oninput = "hesapla()",
                         placeholder = "0.00",
-                        autocomplete = "off" //eski sayıları önermesini önler
+                        autocomplete = "off",
+                        onfocus = "if(this.value==0) { this.value = ''; }",
+                        onclick = "if(this.value==0) { this.value = ''; }",
+                        @Value = (Model.Amount == 0 ? "" : Model.Amount.ToString().Replace(",", "."))
                     })
             </div>
+
+            @* Yetersiz Bakiye Uyarısı İçin Alan *@
+            <div id="hata-mesaji" style="color: #ff4444; font-size: 0.85rem; margin-bottom: 10px; min-height: 1.2rem;"></div>
 
             <div class="total-display">
                 <div class="total-label" id="toplam">0,00 ₺</div>
@@ -180,7 +195,8 @@
 
             <div class="wallet-box">
                 <p class="wallet-label">Mevcut Cüzdan Bakiyesi</p>
-                <p class="wallet-amount">@Model.WalletBalance.ToString("N2") ₺</p>
+                @* Bakiyeye id verdik ki JS ile okuyabilelim *@
+                <p class="wallet-amount" id="cuzdan-gosterge">@Model.WalletBalance.ToString("N2") ₺</p>
 
                 <a href="@Url.Action("Deposit", "Cuzdan")" class="deposit-link">
                     <i class="fas fa-plus-circle"></i> Bakiye Yükle
@@ -192,7 +208,8 @@
                 Yetersiz bakiye durumunda işlem gerçekleşmez.
             </p>
 
-            <button type="submit" class="btn-submit">
+            @* Butona ID ekledik *@
+            <button type="submit" id="btn-submit" class="btn-submit">
                 SATIN ALMAYI ONAYLA
             </button>
         </div>
@@ -200,35 +217,84 @@
 </div>
 
 <script>
-    function hesapla() {
-        // 1. Kutudaki veriyi al
-        var miktarInput = document.getElementById('miktar').value;
-        var toplamElement = document.getElementById('toplam');
+    // Server verilerini JS değişkenlerine alıyoruz
+    const cuzdanBakiyesi = @cuzdanBakiyesi.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    const birimFiyat = @Model.CurrentPrice.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-        // 2. KONTROL: Eğer kutu boşsa veya sadece boşluk varsa
-        if (miktarInput.trim() === "") {
-            toplamElement.innerText = "0,00 ₺"; // Direkt sıfırla
-            return; // Ve işlemi burada bitir (Aşağıya inme)
+    function hesapla() {
+        const miktarInput = document.getElementById('miktar');
+        const toplamElement = document.getElementById('toplam');
+        const btnSubmit = document.getElementById('btn-submit');
+        const hataMesaji = document.getElementById('hata-mesaji');
+
+        // 1. Girdiyi al
+        let miktarText = miktarInput.value;
+        if (miktarText.trim() === "") {
+            toplamElement.innerText = "0,00 ₺";
+            hataMesaji.innerText = "";
+            return;
         }
 
-        // 3. Virgül/Nokta dönüşümü yap
-        var miktar = parseFloat(miktarInput.replace(',', '.'));
+        // 2. Sayıya çevir
+        let miktar = parseFloat(miktarText.replace(',', '.'));
 
-        // C# tarafındaki fiyatı al (Nokta formatında)
-        var fiyat = @Model.CurrentPrice.ToString(System.Globalization.CultureInfo.InvariantCulture);
-
-        // 4. Hesaplama
         if (!isNaN(miktar) && miktar > 0) {
-            var toplam = miktar * fiyat;
+            // Toplam Tutarı Hesapla
+            let toplamTutar = miktar * birimFiyat;
 
-            // Sonucu güzelce formatla (Binlik ayracı ve TL simgesi)
+            // 3. Ekrana Yaz (Formatlı)
             toplamElement.innerText = new Intl.NumberFormat('tr-TR', {
                 style: 'currency',
                 currency: 'TRY'
-            }).format(toplam);
+            }).format(toplamTutar);
+
+            // 4. KRİTİK KONTROL: Para yetiyor mu?
+            // (0.01 tolerans payı bırakıyoruz kuruş hataları için)
+            if (toplamTutar > cuzdanBakiyesi + 0.01) {
+                hataMesaji.innerText = "Yetersiz Bakiye! Bu işlem için bakiyeniz yetmiyor.";
+                hataMesaji.style.fontWeight = "bold";
+                miktarInput.classList.add("input-error");
+
+                // Butonu Kilitle
+                btnSubmit.classList.add("btn-disabled");
+                btnSubmit.disabled = true;
+            } else {
+                // Her şey yolundaysa
+                hataMesaji.innerText = "";
+                miktarInput.classList.remove("input-error");
+
+                // Butonu Aç
+                btnSubmit.classList.remove("btn-disabled");
+                btnSubmit.disabled = false;
+            }
+
         } else {
-            // Eğer geçersiz bir sayı girildiyse (örn: sadece virgül)
             toplamElement.innerText = "0,00 ₺";
+            hataMesaji.innerText = "";
         }
+    }
+
+    // Form Gönderilmeden Önce Çalışacak Fonksiyon
+    function alisOnayi() {
+        const girilen = document.getElementById('miktar').value;
+        const miktar = parseFloat(girilen.replace(',', '.'));
+        const toplamTutar = miktar * birimFiyat;
+
+        // Boşsa gönderme
+        if(girilen == "" || girilen == 0 || isNaN(miktar)) {
+            alert("Lütfen geçerli bir miktar giriniz.");
+            return false;
+        }
+
+        // JS engeli aşılıp buton aktif edildiyse, son bir bakiye kontrolü daha
+        if (toplamTutar > cuzdanBakiyesi + 0.01) {
+            alert("Yetersiz Bakiye!");
+            return false;
+        }
+
+        // ONAY KUTUSU (ALERT)
+        return confirm(girilen + " adet @Model.Symbol almak üzeresiniz.\n\nToplam Tutar: " +
+            new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(toplamTutar) +
+            "\n\nOnaylıyor musunuz?");
     }
 </script>

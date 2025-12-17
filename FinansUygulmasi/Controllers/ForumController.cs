@@ -10,8 +10,8 @@ namespace FinansUygulmasi.Controllers
 {
     public class ForumController : Controller
     {
-        private readonly MongoDbContext _mongoContext;      // MongoDB (Forum)
-        private readonly ApplicationDbContext _sqlContext;  // MySQL (User)
+        private readonly MongoDbContext _mongoContext;      // MongoDB 
+        private readonly ApplicationDbContext _sqlContext;  // MySQL 
 
         public ForumController(MongoDbContext mongoContext, ApplicationDbContext sqlContext)
         {
