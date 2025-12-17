@@ -148,6 +148,7 @@ namespace FinansUygulmasi.Controllers
             // 2. Fiyat Hesapla
             decimal guncelFiyat = FiyatGetir(model.Symbol);
             decimal toplamTutar = guncelFiyat * model.Amount;
+            string siparisNo = "TRX-" + DateTime.Now.Ticks.ToString().Substring(10);
 
             // 3. İŞLEM MANTIĞI
             if (islemTuru == "Alis")
@@ -182,7 +183,7 @@ namespace FinansUygulmasi.Controllers
                     userAsset.Amount += model.Amount;
                 }
 
-                ViewBag.Mesaj = "Alım Başarılı";
+                ViewBag.Mesaj = "Alım Emri";
             }
             else // SATIŞ
             {
@@ -201,13 +202,14 @@ namespace FinansUygulmasi.Controllers
                 // B) Cüzdana Para Ekle
                 wallet.Balance += toplamTutar;
 
-                ViewBag.Mesaj = "Satış Başarılı";
+                ViewBag.Mesaj = "Satış Emri";
             }
 
             // 4. Veritabanını Kaydet
             _context.SaveChanges();
 
             // 5. Bilgi Ekranı
+            ViewBag.IslemNo = siparisNo;
             ViewBag.Tarih = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
             ViewBag.Symbol = model.Symbol;
             ViewBag.Miktar = model.Amount;
@@ -260,6 +262,24 @@ namespace FinansUygulmasi.Controllers
 
             // 4. Sadece View'ı aç (Geri kalan işi Component yapacak)
             return View();
+        }
+
+        // --- DEKONT GÖSTERME SAYFASI (GET) ---
+        [HttpGet]
+        public IActionResult Receipt(string symbol, decimal miktar, decimal fiyat, decimal toplam, string islemTuru, string tarih)
+        {
+            if (string.IsNullOrEmpty(HttpContext.Session.GetString("UserEmail")))
+                return RedirectToAction("Giris", "Acilis");
+
+            ViewBag.IslemNo = "TRX-" + DateTime.Now.Ticks.ToString().Substring(12); // Basit bir no üret
+            ViewBag.Tarih = tarih ?? DateTime.Now.ToString("dd.MM.yyyy HH:mm");
+            ViewBag.Symbol = symbol;
+            ViewBag.Miktar = miktar;
+            ViewBag.Fiyat = fiyat;
+            ViewBag.Toplam = toplam;
+            ViewBag.IslemTuru = islemTuru;
+
+            return View(); // Receipt.cshtml dosyasını açar
         }
     }
 }
