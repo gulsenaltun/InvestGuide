@@ -8,10 +8,9 @@
         public string KonuBasligi { get; set; } 
         public string KullaniciAdi { get; set; }
         public string Icerik { get; set; }
-        public string AvatarUrl { get; set; }
         public DateTime Tarih { get; set; }
 
-        public string TarihFormatli => Tarih.ToString("HH:mm");
+        public string TarihFormatli => Tarih.ToString("dd.MM.yyyy HH:mm");
         public List<AdminYanitViewModel> Yanitlar { get; set; } = new List<AdminYanitViewModel>();
     }
 

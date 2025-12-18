@@ -20,10 +20,6 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<FinansUygulmasi.Data.MongoDbContext>();
 
-// Program.cs
-// "Biri senden IMesajService isterse, ona MesjService örneði ver."
-builder.Services.AddScoped<IMesajService, MesajService>();
-
 
 var app = builder.Build();
 

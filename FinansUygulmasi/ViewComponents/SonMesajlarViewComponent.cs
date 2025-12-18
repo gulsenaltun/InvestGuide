@@ -34,8 +34,6 @@ namespace FinansUygulmasi.ViewComponents
                              ? (x.Content ?? "").Substring(0, 40) + "..."
                              : (x.Content ?? ""),
 
-                    AvatarUrl = (x.Author.Username ?? "A").Substring(0, 1).ToUpper(),
-
                     Tarih = x.CreatedAt, // Konunun açıldığı tarih
 
                     KonuBasligi = x.Title // Konu başlığı

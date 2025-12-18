@@ -78,8 +78,6 @@ namespace FinansUygulmasi.Controllers
                 YazarAdi = konuEntity.Author.Username,
                 YazarRozet = konuEntity.Author.Badge,
                 Tarih = konuEntity.CreatedAt.ToString("dd MMMM yyyy HH:mm"),
-                Goruntulenme = konuEntity.Stats.Views,
-                Begeni = konuEntity.Stats.Likes,
 
                 Yorumlar = konuEntity.Comments.Select(c => new YorumViewModel
                 {
@@ -107,57 +105,59 @@ namespace FinansUygulmasi.Controllers
 
        //yorum yazma
         [HttpPost]
-        public IActionResult CevapYaz(string id, string mesaj)
+        [HttpPost]
+        public IActionResult CevapYaz(string id, string mesaj, string ustYorumId)
         {
-            // ID veya Mesaj boş mu kontrolü
             if (string.IsNullOrEmpty(id) || string.IsNullOrEmpty(mesaj))
             {
-                TempData["Hata"] = "HATA: ID veya Mesaj boş geldi!";
+                TempData["Hata"] = "Mesaj boş olamaz!";
                 return RedirectToAction("Detay", new { id = id });
             }
 
             var currentUser = GetCurrentUserInfo();
-
-            // Türkiye saati ayarı (UTC + 3 Saat)
             var trSaati = DateTime.UtcNow.AddHours(3);
 
-            var yeniYorum = new ForumComment
+            // SENARYO 1: BİR YORUMA CEVAP VERİLİYOR (REPLY EKLEME)
+            // ustYorumId string geldiği için int'e çevirmeyi deniyoruz
+            if (!string.IsNullOrEmpty(ustYorumId) && int.TryParse(ustYorumId, out int parentCommentId))
             {
-                // 1. DÜZELTME: Rastgele bir sayısal ID üretiyoruz (Çakışma ihtimali düşük)
-                CommentId = new Random().Next(100000, 999999),
+                var yeniYanit = new ForumReply
+                {
+                    Username = currentUser.Username,
+                    Text = mesaj,
+                    Date = trSaati
+                };
 
-                UserId = currentUser.UserId,
-                Username = currentUser.Username,
-                Text = mesaj,
+                // Doğru konuyu ve içindeki doğru yorumu bulup replies listesine ekle
+                var filter = Builders<ForumKonu>.Filter.And(
+                     Builders<ForumKonu>.Filter.Eq(x => x.Id, id),
+                     Builders<ForumKonu>.Filter.ElemMatch(x => x.Comments, c => c.CommentId == parentCommentId)
+                );
 
-                Date = trSaati,
-
-                Replies = new List<ForumReply>()
-            };
-
-            // Filtreleme
-            var filter = Builders<ForumKonu>.Filter.Eq(k => k.Id, id);
-            var update = Builders<ForumKonu>.Update.Push(k => k.Comments, yeniYorum);
-
-            // GÜNCELLEME
-            var result = _mongoContext.Tartismalar.UpdateOne(filter, update);
-
-            if (result.MatchedCount == 0)
-            {
-                TempData["Hata"] = $"KRİTİK HATA: Kayıt bulunamadı. ID: {id}";
+                var update = Builders<ForumKonu>.Update.Push("Comments.$.Replies", yeniYanit);
+                _mongoContext.Tartismalar.UpdateOne(filter, update);
             }
-            else if (result.ModifiedCount > 0)
-            {
-                TempData["Hata"] = null;
-            }
+            // SENARYO 2: KONUYA YENİ ANA YORUM YAPILIYOR (COMMENT EKLEME)
             else
             {
-                TempData["Hata"] = "HATA: Yorum eklenemedi.";
+                var yeniYorum = new ForumComment
+                {
+                    CommentId = new Random().Next(100000, 999999), // Rastgele int ID
+                    UserId = currentUser.UserId,
+                    Username = currentUser.Username,
+                    Text = mesaj,
+                    Date = trSaati,
+                    Replies = new List<ForumReply>()
+                };
+
+                var filter = Builders<ForumKonu>.Filter.Eq(k => k.Id, id);
+                var update = Builders<ForumKonu>.Update.Push(k => k.Comments, yeniYorum);
+                _mongoContext.Tartismalar.UpdateOne(filter, update);
             }
 
             return RedirectToAction("Detay", new { id = id });
         }
-        
+
         //yorum silme
         [HttpPost]
         public IActionResult YorumSil(string konuId, string yorumId)

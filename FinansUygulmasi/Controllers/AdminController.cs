@@ -163,7 +163,6 @@ namespace FinansUygulmasi.Controllers
                     _sqlContext.Transactions.RemoveRange(kullaniciIslemleri);
                 }
 
-
                 //kullanıcıyı sil
                 _sqlContext.Users.Remove(user);
                 _sqlContext.SaveChanges();
@@ -186,48 +185,52 @@ namespace FinansUygulmasi.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
 
-            // _mongoContext kullanarak verileri çekiyoruz
+            // Verileri çek
             var tumKonular = await _mongoContext.Tartismalar.Find(_ => true).ToListAsync();
-
             var adminYorumListesi = new List<MesajViewModel>();
 
-            foreach(var konu in tumKonular)
+            foreach (var konu in tumKonular)
             {
-                if (konu.Comments != null)
-                {
-                    foreach (var yorum in konu.Comments)
-                    {
-                        // -- YANITLARI HAZIRLIYORUZ --
-                        var yanitlarListesi = new List<AdminYanitViewModel>();
-                        if (yorum.Replies != null)
-                        {
-                            foreach (var rep in yorum.Replies)
-                            {
-                                yanitlarListesi.Add(new AdminYanitViewModel
-                                {
-                                    KullaniciAdi = rep.Username,
-                                    Icerik = rep.Text,
-                                    Tarih = rep.Date
-                                });
-                            }
-                        }
+                if (konu.Comments == null || !konu.Comments.Any()) continue;
 
-                        // -- ANA LİSTEYE EKLİYORUZ --
-                        adminYorumListesi.Add(new MesajViewModel
+                foreach (var yorum in konu.Comments)
+                {
+                    // -- YANITLARI HAZIRLIYORUZ --
+                    var yanitlarListesi = new List<AdminYanitViewModel>();
+
+                    if (yorum.Replies != null)
+                    {
+                        foreach (var rep in yorum.Replies)
                         {
-                            Id = konu.Id,                // Konu ID
-                            YorumId = yorum.CommentId,   // Yorum ID
-                            KonuBasligi = konu.Title,
-                            KullaniciAdi = yorum.Username,
-                            Icerik = yorum.Text,
-                            Tarih = yorum.Date,
-                            Yanitlar = yanitlarListesi   // Yanıtları buraya koyduk
-                        });
+                            yanitlarListesi.Add(new AdminYanitViewModel
+                            {
+                                // Kullanıcı adı boşsa "Anonim" yazsın, hata vermesin
+                                KullaniciAdi = !string.IsNullOrEmpty(rep.Username) ? rep.Username : "Anonim",
+                                Icerik = rep.Text,
+                                Tarih = rep.Date
+                            });
+                        }
                     }
+
+                    // -- ANA LİSTEYE EKLİYORUZ --
+                    adminYorumListesi.Add(new MesajViewModel
+                    {
+                        Id = konu.Id,
+                        YorumId = yorum.CommentId,
+                        KonuBasligi = konu.Title,
+                        KullaniciAdi = !string.IsNullOrEmpty(yorum.Username) ? yorum.Username : "Anonim",
+                        Icerik = yorum.Text,
+                        Tarih = yorum.Date,
+
+                        // Hazırladığımız listeyi ViewModel'e atıyoruz
+                        Yanitlar = yanitlarListesi
+                    });
                 }
             }
 
-            return View(adminYorumListesi.OrderByDescending(x => x.Tarih).ToList());
+            // En yeniden en eskiye sırala
+            var siraliListe = adminYorumListesi.OrderByDescending(x => x.Tarih).ToList();
+            return View(siraliListe);
         }
 
         public async Task<IActionResult> YorumSil(string konuId, int yorumId)
@@ -237,7 +240,6 @@ namespace FinansUygulmasi.Controllers
             var update = Builders<FinansUygulmasi.Models.Entities.ForumKonu>.Update
                 .PullFilter(x => x.Comments, c => c.CommentId == yorumId);
 
-            await _mongoContext.Tartismalar.UpdateOneAsync(x => x.Id == konuId, update);
             // _mongoContext kullanarak silme işlemi yapıyoruz
             var result = await _mongoContext.Tartismalar
                 .UpdateOneAsync(x => x.Id == konuId, update);
@@ -253,19 +255,33 @@ namespace FinansUygulmasi.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
 
-            // MongoDB Query: "Comments" dizisi içindeki "Replies" dizisinden, "text"i eşleşeni çıkar.
-            var filter = Builders<ForumKonu>.Filter.And(
-                Builders<ForumKonu>.Filter.Eq(x => x.Id, konuId),
-                Builders<ForumKonu>.Filter.ElemMatch(x => x.Comments, c => c.CommentId == anaYorumId)
-            );
+            // Konuyu bul
+            var konu = await _mongoContext.Tartismalar.Find(x => x.Id == konuId).FirstOrDefaultAsync();
 
-            // BsonDocument filtresi için "MongoDB.Bson" kütüphanesi gereklidir (Yukarıya ekledim)
-            var update = Builders<ForumKonu>.Update
-                .PullFilter("Comments.$.Replies", Builders<BsonDocument>.Filter.Eq("text", yanitIcerik));
+            if (konu != null && konu.Comments != null)
+            {
+                // Yorumu bul
+                var anaYorum = konu.Comments.FirstOrDefault(c => c.CommentId == anaYorumId);
 
-            await _mongoContext.Tartismalar.UpdateOneAsync(filter, update);
+                if (anaYorum != null && anaYorum.Replies != null)
+                {
+                    // Silinecek yanıtı içeriğine göre bul
+                    var silinecek = anaYorum.Replies.FirstOrDefault(r => r.Text == yanitIcerik);
 
-            TempData["Mesaj"] = "Yanıt silindi.";
+                    if (silinecek != null)
+                    {
+                        anaYorum.Replies.Remove(silinecek); // Listeden sil
+
+                        // Veritabanını güncelle
+                        await _mongoContext.Tartismalar.ReplaceOneAsync(x => x.Id == konuId, konu);
+
+                        TempData["Mesaj"] = "Yanıt başarıyla silindi.";
+                        return RedirectToAction("Yorumlar");
+                    }
+                }
+            }
+
+            TempData["Hata"] = "Yanıt bulunamadı.";
             return RedirectToAction("Yorumlar");
         }
     }
