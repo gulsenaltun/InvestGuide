@@ -45,21 +45,18 @@
     }
 
     @@media(min - width: 768px)
-
     {
-        .buy-card
+        .buy-card{
+            flex-direction: row;
+        }
 
-    {
-        flex-direction: row;
-    }
+        .left-panel {
+            width: 50%;
+        }
 
-    .left-panel {
-        width: 50%;
-    }
-
-    .right-panel {
-        width: 50%;
-    }
+        .right-panel {
+            width: 50%;
+        }
 
     }
 
@@ -155,7 +152,6 @@
 </style>
 
 <div class="page-container">
-    @* Form başlangıcı: onsubmit eklendi *@
     @using (Html.BeginForm("IslemTamamla", "Market", FormMethod.Post, new { @class = "buy-card", onsubmit = "return alisOnayi()" }))
     {
         @Html.HiddenFor(m => m.Symbol)
@@ -183,7 +179,7 @@
                     })
             </div>
 
-            @* Yetersiz Bakiye Uyarısı İçin Alan *@
+            <!--yetersiz bakiye için uyarı alanı-->
             <div id="hata-mesaji" style="color: #ff4444; font-size: 0.85rem; margin-bottom: 10px; min-height: 1.2rem;"></div>
 
             <div class="total-display">
@@ -195,12 +191,12 @@
 
             <div class="wallet-box">
                 <p class="wallet-label">Mevcut Cüzdan Bakiyesi</p>
-                @* Bakiyeye id verdik ki JS ile okuyabilelim *@
                 <p class="wallet-amount" id="cuzdan-gosterge">@Model.WalletBalance.ToString("N2") ₺</p>
 
                 <a href="@Url.Action("Deposit", "Cuzdan")" class="deposit-link">
                     <i class="fas fa-plus-circle"></i> Bakiye Yükle
                 </a>
+
             </div>
 
             <p style="color: #9ca3af; font-size: 0.9rem; line-height: 1.5;">
@@ -208,7 +204,6 @@
                 Yetersiz bakiye durumunda işlem gerçekleşmez.
             </p>
 
-            @* Butona ID ekledik *@
             <button type="submit" id="btn-submit" class="btn-submit">
                 SATIN ALMAYI ONAYLA
             </button>
@@ -227,7 +222,7 @@
         const btnSubmit = document.getElementById('btn-submit');
         const hataMesaji = document.getElementById('hata-mesaji');
 
-        // 1. Girdiyi al
+        //Girdiyi al
         let miktarText = miktarInput.value;
         if (miktarText.trim() === "") {
             toplamElement.innerText = "0,00 ₺";
@@ -235,21 +230,20 @@
             return;
         }
 
-        // 2. Sayıya çevir
+        // Sayıya çevir
         let miktar = parseFloat(miktarText.replace(',', '.'));
 
         if (!isNaN(miktar) && miktar > 0) {
             // Toplam Tutarı Hesapla
             let toplamTutar = miktar * birimFiyat;
 
-            // 3. Ekrana Yaz (Formatlı)
+            // Ekrana Yaz (Formatlı)
             toplamElement.innerText = new Intl.NumberFormat('tr-TR', {
                 style: 'currency',
                 currency: 'TRY'
             }).format(toplamTutar);
 
-            // 4. KRİTİK KONTROL: Para yetiyor mu?
-            // (0.01 tolerans payı bırakıyoruz kuruş hataları için)
+            // Para yetiyor mu?
             if (toplamTutar > cuzdanBakiyesi + 0.01) {
                 hataMesaji.innerText = "Yetersiz Bakiye! Bu işlem için bakiyeniz yetmiyor.";
                 hataMesaji.style.fontWeight = "bold";

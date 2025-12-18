@@ -18,36 +18,33 @@
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 1.5rem; /* rounded-3xl */
+        border-radius: 1.5rem; 
         padding: 3rem;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         text-align: center;
-        max-width: 32rem; /* max-w-lg */
+        max-width: 32rem; 
         width: 100%;
         animation: popIn 0.5s ease-out;
     }
 
-    /* Animasyon */
+    
     @@keyframes popIn {
-        0%
+        0%{
+            transform: scale(0.9);
+            opacity: 0;
+        }
 
-    {
-        transform: scale(0.9);
-        opacity: 0;
-    }
-
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+        100%{
+            transform: scale(1);
+            opacity: 1;
+        }
 
     }
 
-    /* İkon Alanı */
     .icon-wrapper {
         width: 6rem;
         height: 6rem;
-        background-color: #22c55e; /* Green-500 */
+        background-color: #22c55e; 
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -61,7 +58,6 @@
         color: white;
     }
 
-    /* Başlık ve Metinler */
     .success-title {
         font-size: 2rem;
         font-weight: 700;
@@ -71,12 +67,11 @@
 
     .success-subtitle {
         font-size: 1.1rem;
-        color: #86efac; /* Green-300 */
+        color: #86efac; 
         font-weight: 500;
         margin-bottom: 2rem;
     }
 
-    /* Detay Kutusu */
     .details-box {
         background-color: rgba(0, 0, 0, 0.3);
         border: 1px solid rgba(255, 255, 255, 0.1);
@@ -87,7 +82,7 @@
     }
 
     .detail-text {
-        color: #d1d5db; /* Gray-300 */
+        color: #d1d5db;
         font-size: 0.95rem;
         margin-bottom: 0.75rem;
         display: flex;
@@ -96,18 +91,17 @@
     }
 
     .detail-subtext {
-        color: #9ca3af; /* Gray-400 */
+        color: #9ca3af; 
         font-size: 0.85rem;
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
 
-    /* Buton */
     .btn-return {
         display: block;
         width: 100%;
-        background-color: #4f46e5; /* Indigo-600 */
+        background-color: #4f46e5; 
         color: white;
         font-weight: 700;
         text-decoration: none;
@@ -117,7 +111,7 @@
     }
 
         .btn-return:hover {
-            background-color: #4338ca; /* Indigo-700 */
+            background-color: #4338ca; 
             transform: translateY(-2px);
         }
 

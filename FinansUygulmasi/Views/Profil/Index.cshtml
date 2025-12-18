@@ -7,7 +7,6 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-    /* --- CSS SIFIRLAMA VE TEMEL AYARLAR --- */
     .profile-container {
         max-width: 1600px;
         margin: 0 auto;
@@ -15,7 +14,6 @@
         box-sizing: border-box;
     }
 
-    /* CAM PANEL (ORTAK TASARIM) */
     .glass-panel {
         background-color: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(16px);
@@ -26,7 +24,6 @@
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     }
 
-    /* --- ÜST KISIM: PROFİL BAŞLIĞI --- */
     .profile-header {
         display: flex;
         align-items: center;
@@ -81,28 +78,21 @@
     }
 
 
-    /* --- !!! DÜZELTİLEN KISIM: IZGARA YAPISI !!! --- */
     .dashboard-grid {
         display: grid;
         gap: 1.5rem;
-        /* Varsayılan (Mobil): Tek sütun */
         grid-template-columns: 1fr;
     }
 
-    /* Tablet ve Üstü (768px): Yan yana zorla */
     @@media (min-width: 768px) {
-        .dashboard-grid
-
-    {
-        /* SOL (2 birim) - SAĞ (1 birim) */
+        .dashboard-grid{
         grid-template-columns: 2fr 1fr;
-        align-items: start; /* Yukarı hizala */
+        align-items: start; 
+        }
     }
 
-    }
 
-
-    /* --- SOL TARAFTAKİLER (Cüzdan + Tablo) --- */
+    /*cüzdan ve tablo*/
     .left-side {
         display: flex;
         flex-direction: column;
@@ -255,14 +245,14 @@
     }
 
 
-    /* --- SAĞ TARAFTAKİLER (Grafik) --- */
+    /* grafik */
     .right-side {
-        height: 100%; /* Sol tarafın yüksekliğine uyum sağla */
+        height: 100%; 
     }
 
     .chart-panel {
         height: 100%;
-        min-height: 450px; /* Grafik panelinin minimum boyu */
+        min-height: 450px; 
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -284,6 +274,7 @@
 
 <div class="profile-container">
 
+    <!--profil ve toplam varlık kısımı-->
     <div class="glass-panel profile-header">
         <div class="avatar-circle"><i class="fas fa-user"></i></div>
         <div class="user-info">
@@ -305,7 +296,7 @@
                     <p class="stat-label" style="margin-bottom: 5px;"><i class="fas fa-wallet" style="margin-right:5px;"></i> Nakit Cüzdan</p>
                     <p class="wallet-val">@Model.NakitBakiye.ToString("C2")</p>
                 </div>
-                <a href="@Url.Action("Deposit", "Cuzdan", new { id = Model.UserId })" class="btn-add-funds">
+                <a href="@Url.Action("Deposit", "Cuzdan")" class="btn-add-funds">
                     <i class="fas fa-plus"></i> Para Yükle
                 </a>
             </div>

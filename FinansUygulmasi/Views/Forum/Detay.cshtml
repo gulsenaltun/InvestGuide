@@ -6,7 +6,6 @@
 }
 
 <style>
-    /* CSS kodların aynen korundu */
     .forum-detail-container {
         max-width: 900px;
         margin: 2rem auto;
@@ -20,7 +19,6 @@
         text-decoration: none;
     }
 
-    /* Konu Kartı */
     .topic-card {
         background: rgba(255,255,255,0.05);
         padding: 2rem;
@@ -29,7 +27,6 @@
         border: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* Yorum Kartı */
     .comment-card {
         background: rgba(0,0,0,0.2);
         padding: 1.5rem;
@@ -55,7 +52,6 @@
         font-size: 0.9rem;
     }
 
-    /* Silme Butonu */
     .btn-delete {
         position: absolute;
         top: 15px;
@@ -72,7 +68,6 @@
             transform: scale(1.1);
         }
 
-    /* Form Stilleri */
     .reply-box {
         margin-top: 2rem;
         background: rgba(255,255,255,0.05);
@@ -121,8 +116,6 @@
         <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.1); color:#9ca3af; font-size:0.9rem; display:flex; gap:15px;">
             <span>👤 @Model.YazarAdi</span>
             <span>📅 @Model.Tarih</span>
-            <span>👁️ @Model.Goruntulenme</span>
-            <span>❤️ @Model.Begeni</span>
         </div>
     </div>
 

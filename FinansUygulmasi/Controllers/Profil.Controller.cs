@@ -20,32 +20,29 @@ namespace FinansUygulmasi.Controllers
 
         public IActionResult Index()
         {
-            // 1. KONTROL: Session dolu mu? (Giriş yapılmış mı?)
             var userEmail = HttpContext.Session.GetString("UserEmail");
 
             if (string.IsNullOrEmpty(userEmail))
             {
-                // Session boşsa, giriş sayfasına geri gönder
                 return RedirectToAction("Giris", "Acilis");
             }
 
-            // 2. KULLANICIYI BUL (Session'daki e-posta ile)
+            // kullanıcı bulma (Session'daki e-posta ile)
             var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
             if (user == null)
             {
-                // Kritik hata: Session var ama kullanıcı DB'den silinmiş
                 HttpContext.Session.Clear();
                 return RedirectToAction("Giris", "Acilis");
             }
 
-            // 3. CÜZDAN BİLGİLERİ
+            // cüzdan bilgikeri
             var wallet = _context.Wallets.FirstOrDefault(w => w.UserId == user.UserId);
             decimal nakitBakiye = wallet != null ? wallet.Balance : 0;
 
-            // 4. MODELİ DOLDUR
+            // MODELİ DOLDUR
             var profilModel = new ProfilViewModel
             {
-                UserId = user.UserId, // <--- BUNU EKLEMEZSEN ID "0" OLARAK GİDER
+                UserId = user.UserId, 
                 Username = user.Username,
                 Email = user.Email,
                 Role = user.Role,
@@ -53,7 +50,7 @@ namespace FinansUygulmasi.Controllers
                 NakitBakiye = nakitBakiye
             };
 
-            // --- BURADAN AŞAĞISI AYNI (Varlık Hesaplamaları) ---
+            //varlık hesaplama
             var userAssets = _context.UserAssets.Where(ua => ua.UserId == user.UserId).ToList();
             var allAssets = _context.Assets.ToList();
             var piyasaVerileri = MarketDataService.GetTumVeriler();

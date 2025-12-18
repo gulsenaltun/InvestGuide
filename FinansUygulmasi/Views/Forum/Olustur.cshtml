@@ -15,7 +15,6 @@
 }
 
 <style>
-    /* Tasarım kodların aynen kalacak */
     .forum-create-container {
         min-height: 85vh;
         display: flex;
@@ -160,17 +159,20 @@
 
         @using (Html.BeginForm("Olustur", "Forum", FormMethod.Post))
         {
+            <!--varlık türür girme-->
             <div class="form-group">
                 @Html.LabelFor(m => m.VarlıkTag, new { @class = "form-label" })
                 @Html.DropDownListFor(m => m.VarlıkTag, varlikListesi, new { @class = "form-input" })
             </div>
 
+            <!--konu başlığı-->
             <div class="form-group">
                 @Html.LabelFor(m => m.Baslik, new { @class = "form-label" })
                 @Html.TextBoxFor(m => m.Baslik, new { @class = "form-input", placeholder = "Örn: 2025'te Altın ne olur?", autocomplete = "off" })
                 @Html.ValidationMessageFor(m => m.Baslik, "", new { @class = "validation-msg" })
             </div>
 
+            <!--içerik metini gir-->
             <div class="form-group" style="margin-bottom: 2rem;">
                 @Html.LabelFor(m => m.Icerik, new { @class = "form-label" })
                 @Html.TextAreaFor(m => m.Icerik, new { @class = "form-input", rows = "6", placeholder = "Fikirlerini detaylıca yaz..." })

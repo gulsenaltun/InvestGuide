@@ -1,5 +1,5 @@
 ﻿@{
-    Layout = null; // Dekontta menü/footer olmasın, sadece kağıt olsun
+    Layout = null;
 }
 
 <!DOCTYPE html>
@@ -11,7 +11,7 @@
 
     <style>
         body {
-            background-color: #f3f4f6; /* Gri arka plan */
+            background-color: #f3f4f6;
             font-family: 'Inter', sans-serif;
             display: flex;
             justify-content: center;
@@ -25,7 +25,7 @@
             max-width: 600px;
             padding: 40px;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            border-top: 10px solid #4f46e5; /* İndigo Çizgi */
+            border-top: 10px solid #4f46e5;
         }
 
         .header {
@@ -101,30 +101,54 @@
             padding-top: 20px;
         }
 
-        /* Yazdırma Butonu (Sadece ekranda görünür) */
         .print-btn-container {
             text-align: center;
             margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px; 
         }
 
         .btn-print {
             background-color: #1f2937;
             color: white;
             border: none;
-            padding: 10px 25px;
-            border-radius: 5px;
+            padding: 12px 25px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
         }
 
-        /* Yazıcıda Butonu ve Arka Planı Gizle */
-        @@media print {
-            body
+            .btn-print:hover {
+                background-color: #374151;
+            }
 
-        {
+        .btn-home {
+            background-color: #e5e7eb;
+            color: #374151;
+            text-decoration: none; 
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid #d1d5db;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+            .btn-home:hover {
+                background-color: #d1d5db;
+                color: #111;
+            }
+
+        /* YAZDIRMA EKRANINDA GİZLEME */
+        @@media print {
+            body{
             background-color: white;
             padding: 0;
-        }
+          }
 
         .receipt-paper {
             box-shadow: none;
@@ -133,8 +157,9 @@
             width: 100%;
         }
 
+        /* Yazdırırken butonları gizle */
         .print-btn-container {
-            display: none;
+            display: none !important;
         }
 
         }
@@ -144,7 +169,7 @@
 
     <div class="receipt-paper">
         <div class="header">
-            <div class="logo">🤖 Finans AI</div>
+            <div class="logo">🤖 Yatırım Rehberi</div>
             <div class="receipt-title">İşlem Dekontu</div>
         </div>
 
@@ -181,12 +206,18 @@
         </div>
 
         <div class="footer">
-            Bu belge Finans AI tarafından elektronik ortamda oluşturulmuştur. Islak imza gerektirmez.<br>
-            Finans AI Yatırım Hizmetleri A.Ş.
+            Bu belge Yatırım Rehberi tarafından elektronik ortamda oluşturulmuştur. Islak imza gerektirmez.<br>
+            Yatırım Rehberi Hizmetleri A.Ş.
         </div>
 
         <div class="print-btn-container">
-            <button onclick="window.print()" class="btn-print">Yazdır / PDF Olarak Kaydet</button>
+            <a href="@Url.Action("Index", "Home")" class="btn-home">
+                ← Ana Sayfaya Dön
+            </a>
+
+            <button onclick="window.print()" class="btn-print">
+                Yazdır / PDF Kaydet
+            </button>
         </div>
     </div>
 

@@ -15,30 +15,42 @@ namespace FinansUygulmasi.Controllers
             _context = context;
         }
 
-        // 1. Para Yükleme Sayfasını Aç
+        // Para Yükleme Sayfasını Aç
         [HttpGet]
-        public IActionResult Deposit(int id)
+        public IActionResult Deposit() 
         {
-            if (id == 0) return RedirectToAction("Giris", "Acilis");
-            ViewBag.UserId = id;
+            var userEmail = HttpContext.Session.GetString("UserEmail");
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return RedirectToAction("Giris", "Acilis");
+            }
+
+            // Veritabanından kullanıcıyı bul
+            var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
+
+            if (user == null) return RedirectToAction("Giris", "Acilis");
+
+            //ID'yi ViewBag'e biz koyuyoruz (URL'den değil, veritabanından)
+            ViewBag.UserId = user.UserId;
+
             return View();
         }
 
-        // 2. Para Yükleme İşlemini Yap
+        // Para Yükleme İşlemini Yap
         [HttpPost]
         public IActionResult AddFunds(int userId, decimal miktar, string kartAd, string kartNo, string skt, string cvv)
         {
-            // 1. Miktar kontrolü
+            // Miktar kontrolü
             if (miktar <= 0)
             {
                 TempData["Hata"] = "Lütfen 0'dan büyük bir tutar giriniz.";
                 return RedirectToAction("Deposit", new { id = userId });
             }
 
-            // 2. Kullanıcı Cüzdanını Bulmaya Çalış
+            // Kullanıcı Cüzdanını Bulmaya Çalış
             var wallet = _context.Wallets.FirstOrDefault(w => w.UserId == userId);
 
-            // --- KRİTİK DÜZELTME BAŞLANGICI ---
 
             // Eğer cüzdan YOKSA, hemen orada yeni bir cüzdan oluşturuyoruz.
             if (wallet == null)
@@ -53,9 +65,6 @@ namespace FinansUygulmasi.Controllers
                 _context.SaveChanges(); // Cüzdanı veritabanına kaydettik
             }
 
-            // --- KRİTİK DÜZELTME BİTİŞİ ---
-
-            // Artık cüzdanın var olduğundan %100 eminiz, parayı yüklüyoruz.
             wallet.Balance += miktar;
             _context.SaveChanges();
 
@@ -69,7 +78,7 @@ namespace FinansUygulmasi.Controllers
             });
         }
 
-        // 3. Dekont Görüntüleme Sayfası (YENİ EKLENDİ)
+        // Dekont Görüntüleme Sayfası 
         [HttpGet]
         public IActionResult Dekont(int userId, decimal tutar, string islemTarihi, string kartSonDort)
         {

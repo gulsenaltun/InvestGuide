@@ -21,10 +21,6 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<FinansUygulmasi.Data.MongoDbContext>();
 
 // Program.cs
-
-// ... diðer servis kayýtlarý ...
-
-// Bu satýr sisteme þunu söyler:
 // "Biri senden IMesajService isterse, ona MesjService örneði ver."
 builder.Services.AddScoped<IMesajService, MesajService>();
 

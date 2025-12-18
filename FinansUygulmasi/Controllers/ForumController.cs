@@ -19,7 +19,7 @@ namespace FinansUygulmasi.Controllers
             _sqlContext = sqlContext;
         }
 
-        // 1. LİSTELEME
+        //  mesajları listeleme
         public async Task<IActionResult> Index()
         {
             var konular = await _mongoContext.Tartismalar.Find(k => true)
@@ -28,17 +28,13 @@ namespace FinansUygulmasi.Controllers
             return View(konular);
         }
 
-        // 2. YENİ KONU OLUŞTURMA SAYFASI
+        //yeni konu oluşturma sayfası
         [HttpGet]
         public IActionResult Olustur()
         {
-            // DÜZELTME: Login sayfasına yönlendirmeyi kapattım ki 404 hatası alma.
-            // if (!User.Identity.IsAuthenticated) return RedirectToAction("Login", "Account");
-
             return View();
         }
 
-        // 3. YENİ KONU KAYDETME
         [HttpPost]
         public IActionResult Olustur(KonuOlusturViewModel model)
         {
@@ -56,7 +52,7 @@ namespace FinansUygulmasi.Controllers
                 Author = new ForumAuthor
                 {
                     UserId = currentUser.UserId,
-                    Username = currentUser.Username, // MySQL'den gelen isim
+                    Username = currentUser.Username, 
                     Badge = "Standart"
                 },
                 Comments = new List<ForumComment>()
@@ -66,7 +62,7 @@ namespace FinansUygulmasi.Controllers
             return RedirectToAction("Index");
         }
 
-        // 4. DETAY SAYFASI
+        // detay sayfası
         public IActionResult Detay(string id)
         {
             if (string.IsNullOrEmpty(id)) return RedirectToAction("Index");
@@ -109,10 +105,7 @@ namespace FinansUygulmasi.Controllers
             return View(detayModel);
         }
 
-        // 5. YORUM YAZMA
-        [HttpPost]
-        [HttpPost]
-        // 5. YORUM YAZMA (SAAT ve ID AYARLI)
+       //yorum yazma
         [HttpPost]
         public IActionResult CevapYaz(string id, string mesaj)
         {
@@ -126,8 +119,6 @@ namespace FinansUygulmasi.Controllers
             var currentUser = GetCurrentUserInfo();
 
             // Türkiye saati ayarı (UTC + 3 Saat)
-            // Eğer sunucunuz zaten TR saatindeyse burayı DateTime.Now yapabilirsiniz.
-            // Ama garanti olsun diye UtcNow.AddHours(3) kullanıyoruz.
             var trSaati = DateTime.UtcNow.AddHours(3);
 
             var yeniYorum = new ForumComment
@@ -139,7 +130,6 @@ namespace FinansUygulmasi.Controllers
                 Username = currentUser.Username,
                 Text = mesaj,
 
-                // 2. DÜZELTME: Saati Türkiye saati olarak kaydediyoruz
                 Date = trSaati,
 
                 Replies = new List<ForumReply>()
@@ -167,14 +157,13 @@ namespace FinansUygulmasi.Controllers
 
             return RedirectToAction("Detay", new { id = id });
         }
-        // 6. YORUM SİLME
-        // 6. YORUM SİLME (DÜZELTİLMİŞ HALİ)
+        
+        //yorum silme
         [HttpPost]
         public IActionResult YorumSil(string konuId, string yorumId)
         {
             var currentUser = GetCurrentUserInfo();
 
-            // DÜZELTME BURADA:
             // HTML'den string olarak gelen yorumId'yi sayıya (int) çeviriyoruz.
             if (!int.TryParse(yorumId, out int silinecekYorumId))
             {
@@ -203,8 +192,6 @@ namespace FinansUygulmasi.Controllers
 
         private (int UserId, string Username) GetCurrentUserInfo()
         {
-            // 1. AcilisController'da kaydettiğin Session verisine bakıyoruz.
-            // Orada "UserEmail" anahtarıyla maili tutmuştun.
             var loggedInEmail = HttpContext.Session.GetString("UserEmail");
 
             if (!string.IsNullOrEmpty(loggedInEmail))
@@ -214,7 +201,6 @@ namespace FinansUygulmasi.Controllers
 
                 if (userFromDb != null)
                 {
-                    // BINGO! Giriş yapan kişiyi bulduk.
                     // Onun gerçek ID'sini ve Adını döndürüyoruz.
                     return (userFromDb.UserId, userFromDb.Username);
                 }

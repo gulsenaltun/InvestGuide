@@ -120,7 +120,7 @@ namespace FinansUygulmasi.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpGet] // Bu attribute'u eklemek iyi bir pratiktir
+        [HttpGet] 
         public IActionResult Kullanicilar(string search)
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
@@ -129,14 +129,14 @@ namespace FinansUygulmasi.Controllers
 
             if (!string.IsNullOrEmpty(search))
             {
-                // 1. Gelen verinin başındaki/sonundaki boşlukları sil
+                // Gelen verinin başındaki/sonundaki boşlukları sil
                 search = search.Trim();
 
-                // 2. Arama filtresini uygula
+                // Arama filtresini uygula
                 users = users.Where(u => u.Username.Contains(search) || u.Email.Contains(search));
             }
 
-            // 3. Kullanıcının aradığı kelimeyi sayfaya geri gönder (Input içinde kalsın)
+            //  Kullanıcının aradığı kelimeyi sayfaya geri gönder 
             ViewBag.CurrentSearch = search;
 
             return View(users.ToList());
@@ -164,10 +164,8 @@ namespace FinansUygulmasi.Controllers
                 }
 
 
-                // --- 2. ADIM: KULLANICIYI SİL ---
+                //kullanıcıyı sil
                 _sqlContext.Users.Remove(user);
-
-                // Tüm değişiklikleri (hem transaction silme hem user silme) kaydet
                 _sqlContext.SaveChanges();
             }
 

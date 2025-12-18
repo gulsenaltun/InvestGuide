@@ -2,20 +2,19 @@
 @model MarketDetailViewModel
 
 @{
-    Layout = null; // Eğer bir layout içinde çağıracaksanız bunu kaldırın
+    Layout = null;
 
-    // Tema Rengi Belirleme
-    string themeColor = "#818cf8"; // Varsayılan İndigo
+    string themeColor = "#818cf8"; 
     string glowColor = "rgba(129, 140, 248, 0.2)";
 
     if (Model.PredictionDirection == "Yukselis")
     {
-        themeColor = "#4ade80"; // Yeşil
+        themeColor = "#4ade80";
         glowColor = "rgba(74, 222, 128, 0.2)";
     }
     else if (Model.PredictionDirection == "Dusus")
     {
-        themeColor = "#f87171"; // Kırmızı
+        themeColor = "#f87171"; 
         glowColor = "rgba(248, 113, 113, 0.2)";
     }
 }

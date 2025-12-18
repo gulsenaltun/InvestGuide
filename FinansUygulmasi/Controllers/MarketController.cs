@@ -20,13 +20,11 @@ namespace FinansUygulmasi.Controllers
 
         public IActionResult Index()
         {
-            // 1. KONTROL: Eğer kapalıysa HTML String döndür
             if (AdminController.MarketErisimiAcik == false)
             {
-                return MarketKapaliMesaji(); // ContentResult döner
+                return MarketKapaliMesaji(); 
             }
 
-            // 2. Açıksa normal View döner
             return View();
         }
 
@@ -34,7 +32,7 @@ namespace FinansUygulmasi.Controllers
         {
             if (AdminController.MarketErisimiAcik == false)
             {
-                return MarketKapaliMesaji(); // ContentResult döner
+                return MarketKapaliMesaji(); 
             }
 
             return View();
@@ -44,7 +42,7 @@ namespace FinansUygulmasi.Controllers
         {
             if (AdminController.MarketErisimiAcik == false)
             {
-                return MarketKapaliMesaji(); // ContentResult döner
+                return MarketKapaliMesaji(); 
             }
 
             return View();
@@ -54,7 +52,7 @@ namespace FinansUygulmasi.Controllers
         {
             if (AdminController.MarketErisimiAcik == false)
             {
-                return MarketKapaliMesaji(); // ContentResult döner
+                return MarketKapaliMesaji(); 
             }
 
             return View();
@@ -64,7 +62,7 @@ namespace FinansUygulmasi.Controllers
         {
             if (AdminController.MarketErisimiAcik == false)
             {
-                return MarketKapaliMesaji(); // ContentResult döner
+                return MarketKapaliMesaji(); 
             }
 
             return View();
@@ -78,33 +76,30 @@ namespace FinansUygulmasi.Controllers
             return veri != null ? veri.CurrentPrice : 0;
         }
 
-        // --- ALIM SAYFASI (GET) ---
+        //Alım işlemleri için
         [HttpGet]
         public IActionResult Buy(string symbol)
         {
-            // 1. Session Kontrolü
             var userEmail = HttpContext.Session.GetString("UserEmail");
             if (string.IsNullOrEmpty(userEmail)) return RedirectToAction("Giris", "Acilis");
 
             var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
             var wallet = _context.Wallets.FirstOrDefault(w => w.UserId == user.UserId);
 
-            // 2. Model Hazırlığı
+            //Model Hazırlığı
             var model = new TradeViewModel
             {
                 Symbol = symbol,
                 CurrentPrice = FiyatGetir(symbol),
-                WalletBalance = wallet != null ? wallet.Balance : 0 // DB'den gelen bakiye
+                WalletBalance = wallet != null ? wallet.Balance : 0 
             };
 
             return View(model);
         }
 
-        // --- SATIŞ SAYFASI (GET) ---
         [HttpGet]
         public IActionResult Sell(string symbol)
         {
-            // 1. Session Kontrolü
             var userEmail = HttpContext.Session.GetString("UserEmail");
             if (string.IsNullOrEmpty(userEmail)) return RedirectToAction("Giris", "Acilis");
 
@@ -116,7 +111,7 @@ namespace FinansUygulmasi.Controllers
 
             decimal sahipOlunanMiktar = userAsset != null ? userAsset.Amount : 0;
 
-            // 2. Model Hazırlığı
+            // Model Hazırlığı
             var model = new TradeViewModel
             {
                 Symbol = symbol,
@@ -130,27 +125,24 @@ namespace FinansUygulmasi.Controllers
             return View(model);
         }
 
-        // --- İŞLEM SONUCU (POST) ---
         [HttpPost]
         public IActionResult IslemTamamla(TradeViewModel model, string islemTuru)
         {
-            // 1. Kullanıcıyı Bul
             var userEmail = HttpContext.Session.GetString("UserEmail");
             if (string.IsNullOrEmpty(userEmail)) return RedirectToAction("Giris", "Acilis");
 
             var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
             var wallet = _context.Wallets.FirstOrDefault(w => w.UserId == user.UserId);
 
-            // Asset ID'sini bul (Tablolara kayıt için lazım)
+            // Asset ID'sini bul 
             var assetEntity = _context.Assets.FirstOrDefault(a => a.Symbol == model.Symbol);
             if (assetEntity == null) return RedirectToAction("Index", "Acilis"); // Hata: Asset bulunamadı
 
-            // 2. Fiyat Hesapla
+            // Fiyat Hesapla
             decimal guncelFiyat = FiyatGetir(model.Symbol);
             decimal toplamTutar = guncelFiyat * model.Amount;
             string siparisNo = "TRX-" + DateTime.Now.Ticks.ToString().Substring(10);
 
-            // 3. İŞLEM MANTIĞI
             if (islemTuru == "Alis")
             {
                 // Bakiye Yeterli mi?
@@ -160,10 +152,10 @@ namespace FinansUygulmasi.Controllers
                     return RedirectToAction("Buy", new { symbol = model.Symbol });
                 }
 
-                // A) Cüzdandan Düş
+                //Cüzdandan Düş
                 wallet.Balance -= toplamTutar;
 
-                // B) UserAssets (Varlık) Ekle veya Güncelle
+                //UserAssets (Varlık) Ekle veya Güncelle
                 var userAsset = _context.UserAssets.FirstOrDefault(ua => ua.UserId == user.UserId && ua.AssetId == assetEntity.AssetId);
 
                 if (userAsset == null)
@@ -185,7 +177,7 @@ namespace FinansUygulmasi.Controllers
 
                 ViewBag.Mesaj = "Alım Emri";
             }
-            else // SATIŞ
+            else //SATIŞ
             {
                 // Elde yeterli varlık var mı?
                 var userAsset = _context.UserAssets.FirstOrDefault(ua => ua.UserId == user.UserId && ua.AssetId == assetEntity.AssetId);
@@ -196,27 +188,28 @@ namespace FinansUygulmasi.Controllers
                     return RedirectToAction("Sell", new { symbol = model.Symbol });
                 }
 
-                // A) Varlıktan Düş
+                //Varlıktan Düş
                 userAsset.Amount -= model.Amount;
 
-                // B) Cüzdana Para Ekle
+                //Cüzdana Para Ekle
                 wallet.Balance += toplamTutar;
 
                 ViewBag.Mesaj = "Satış Emri";
             }
 
-            // 4. Veritabanını Kaydet
+            //Veritabanını Kaydet
             _context.SaveChanges();
 
-            // 5. Bilgi Ekranı
-            return RedirectToAction("Receipt", new
-            {
-                symbol = model.Symbol,
-                miktar = model.Amount,
-                fiyat = guncelFiyat,
-                toplam = toplamTutar,
-                islemTuru = islemTuru
-            });
+            //Bilgi Ekranı - tempdata ile taşınıyor
+            TempData["Receipt_Symbol"] = model.Symbol;
+            TempData["Receipt_Miktar"] = model.Amount.ToString();
+            TempData["Receipt_Fiyat"] = guncelFiyat.ToString();
+            TempData["Receipt_Toplam"] = toplamTutar.ToString();
+            TempData["Receipt_IslemTuru"] = islemTuru;
+            TempData["Receipt_Tarih"] = DateTime.Now.ToString("dd.MM.yyyy HH:mm");
+            TempData["Receipt_No"] = "TRX-" + DateTime.Now.Ticks.ToString().Substring(10);
+
+            return RedirectToAction("Receipt");
         }
 
         private ContentResult MarketKapaliMesaji()
@@ -236,49 +229,49 @@ namespace FinansUygulmasi.Controllers
                 </div>
             </body>";
 
-            // 'text/html' diyerek tarayıcıya bunun bir kod olduğunu söylüyoruz
+            // Başka bir action türü daha kullanıyoruz
             return Content(htmlIcerik, "text/html; charset=utf-8");
         }
 
-        // --- ASİSTAN (YAPAY ZEKA) SAYFASI (GET) ---
-        // --- ASİSTAN SAYFASI (Eksik olan parça bu) ---
-        // --- ASİSTAN (ASK) SAYFASI ---
         public IActionResult Ask(string symbol)
         {
-            // 1. Market Kapalıysa Engelle
+            // Market Kapalıysa Engelle
             if (AdminController.MarketErisimiAcik == false)
             {
-                // İstersen burada "MarketKapaliMesaji()" metodunu da çağırabilirsin
+                // MarketKapalıMesaji() nıda çağırabilirdim
                 return RedirectToAction("Index"); 
             }
 
-            // 2. Sembol boş geldiyse ana sayfaya at
+            // Sembol boş geldiyse ana sayfaya at
             if (string.IsNullOrEmpty(symbol)) return RedirectToAction("Index");
 
-            // 3. KRİTİK ADIM: View Component'in çalışması için bu veriyi taşıyoruz
             // Ask.cshtml sayfasındaki "ViewBag.Symbol" burayı okur.
             ViewBag.Symbol = symbol;
 
-            // 4. Sadece View'ı aç (Geri kalan işi Component yapacak)
             return View();
         }
 
-        // --- DEKONT GÖSTERME SAYFASI (GET) ---
+        //Dekont sayfası
         [HttpGet]
-        public IActionResult Receipt(string symbol, decimal miktar, decimal fiyat, decimal toplam, string islemTuru, string tarih)
+        public IActionResult Receipt()
         {
             if (string.IsNullOrEmpty(HttpContext.Session.GetString("UserEmail")))
                 return RedirectToAction("Giris", "Acilis");
 
-            ViewBag.IslemNo = "TRX-" + DateTime.Now.Ticks.ToString().Substring(12); // Basit bir no üret
-            ViewBag.Tarih = tarih ?? DateTime.Now.ToString("dd.MM.yyyy HH:mm");
-            ViewBag.Symbol = symbol;
-            ViewBag.Miktar = miktar;
-            ViewBag.Fiyat = fiyat;
-            ViewBag.Toplam = toplam;
-            ViewBag.IslemTuru = islemTuru;
+            if (TempData["Receipt_Symbol"] == null)
+            {
+                return RedirectToAction("Index");
+            }
 
-            return View(); // Receipt.cshtml dosyasını açar
+            ViewBag.IslemNo = TempData["Receipt_No"];
+            ViewBag.Tarih = TempData["Receipt_Tarih"];
+            ViewBag.Symbol = TempData["Receipt_Symbol"];
+            ViewBag.Miktar = TempData["Receipt_Miktar"];
+            ViewBag.Fiyat = Convert.ToDecimal(TempData["Receipt_Fiyat"]);
+            ViewBag.Toplam = Convert.ToDecimal(TempData["Receipt_Toplam"]);
+            ViewBag.IslemTuru = TempData["Receipt_IslemTuru"];
+
+            return View(); 
         }
     }
 }

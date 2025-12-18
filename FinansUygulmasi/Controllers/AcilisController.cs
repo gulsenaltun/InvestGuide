@@ -54,13 +54,23 @@ namespace FinansUygulmasi.Controllers
 
             if (user != null)
             {
-                var hasher = new PasswordHasher<User>();
+                bool girisBasarili = false;
 
-                //kullanıcı nesnesi, veritabanındaki hash, girilen şifre
-                var verificationResult = hasher.VerifyHashedPassword(user, user.PasswordHash, model.Password);
+                if (user.Role == "admin")
+                {
+                    if (user.PasswordHash == model.Password)
+                        girisBasarili = true;
+                }
+                else
+                {
+                    var hasher = new PasswordHasher<User>();
+                    var verificationResult = hasher.VerifyHashedPassword(user, user.PasswordHash, model.Password);
 
-                //sonuç başarılı yani succes ise bunları yap
-                if (verificationResult == PasswordVerificationResult.Success)
+                    if (verificationResult == PasswordVerificationResult.Success)
+                        girisBasarili = true;
+                }
+
+                if (girisBasarili)
                 {
                     HttpContext.Session.SetString("UserEmail", user.Email);
                     HttpContext.Session.SetInt32("UserId", user.UserId);
@@ -68,7 +78,7 @@ namespace FinansUygulmasi.Controllers
 
                     if (user.Role == "admin")
                         return RedirectToAction("Index", "Admin");
-                    // admin değilsa kullanıcı profil sayfasına yönlendiriyoruz
+
                     return RedirectToAction("Index", "Home");
                 }
             }
@@ -196,12 +206,12 @@ namespace FinansUygulmasi.Controllers
                 mail.To.Add(aliciEmail);
                 mail.Subject = "Yeni Şifreniz Oluşturuldu";
                 mail.Body = $@"
-            <h2>Merhaba,</h2>
-            <p>Hesabınız için şifre sıfırlama talebinde bulundunuz.</p>
-            <p><strong>Yeni Şifreniz:</strong> {yeniSifre}</p>
-            <p>Lütfen giriş yaptıktan sonra şifrenizi değiştirmeyi unutmayın.</p>
-            <br>
-            <p>Saygılarımızla,<br>Finans AI Ekibi</p>";
+                    <h2>Merhaba,</h2>
+                    <p>Hesabınız için şifre sıfırlama talebinde bulundunuz.</p>
+                    <p><strong>Yeni Şifreniz:</strong> {yeniSifre}</p>
+                    <p>Lütfen giriş yaptıktan sonra şifrenizi değiştirmeyi unutmayın.</p>
+                    <br>
+                    <p>Saygılarımızla,<br>Finans AI Ekibi</p>";
                 mail.IsBodyHtml = true; // HTML formatında gönder
 
                 smtp.Send(mail);

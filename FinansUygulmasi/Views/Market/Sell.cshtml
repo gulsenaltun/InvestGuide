@@ -8,7 +8,6 @@
 }
 
 <style>
-    /* GENEL SAYFA DÜZENİ */
     .sell-container {
         display: flex;
         align-items: center;
@@ -16,7 +15,6 @@
         min-height: 80vh;
     }
 
-    /* KART TASARIMI (CAM EFEKTİ) */
     .sell-card {
         width: 100%;
         max-width: 28rem;
@@ -30,7 +28,6 @@
         overflow: hidden;
     }
 
-    /* ARKA PLAN KIRMIZI BULANIKLIK */
     .bg-blur-red {
         position: absolute;
         top: -2.5rem;
@@ -44,7 +41,6 @@
         pointer-events: none;
     }
 
-    /* BAŞLIK ALANI */
     .header-area {
         text-align: center;
         margin-bottom: 2rem;
@@ -87,7 +83,6 @@
         color: white;
     }
 
-    /* INPUT ETİKETLERİ */
     .input-label {
         display: flex;
         justify-content: space-between;
@@ -98,7 +93,6 @@
         margin-left: 0.25rem;
     }
 
-    /* MEVCUT BAKİYE YAZISI (TIKLANABİLİR) */
     .balance-info {
         color: #f87171;
         font-size: 0.8rem;
@@ -110,7 +104,6 @@
         position: relative;
     }
 
-    /* INPUT ALANI */
     .sell-input {
         width: 100%;
         background-color: rgba(0, 0, 0, 0.3);
@@ -128,7 +121,6 @@
             border-color: #ef4444;
         }
 
-    /* HATA DURUMUNDA INPUT GÖRÜNÜMÜ */
     .input-error {
         border-color: #ff0000 !important;
         color: #ff0000 !important;
@@ -142,7 +134,6 @@
         color: #6b7280;
     }
 
-    /* ÖZET KUTUSU */
     .summary-box {
         background-color: rgba(239, 68, 68, 0.1);
         border-radius: 0.75rem;
@@ -168,7 +159,6 @@
         font-family: monospace;
     }
 
-    /* BUTON */
     .btn-sell-confirm {
         width: 100%;
         background: linear-gradient(to right, #dc2626, #ef4444);
@@ -226,7 +216,6 @@
             }
         </div>
 
-        @* Form başlangıcı. onsubmit="return satisOnayi()" sayesinde JS onayı almadan form gönderilmez. *@
         @using (Html.BeginForm("IslemTamamla", "Market", FormMethod.Post, new { id = "satisFormu", onsubmit = "return satisOnayi()", style = "position: relative; z-index: 10; display: flex; flex-direction: column; gap: 1.5rem;" }))
         {
             @Html.HiddenFor(m => m.Symbol)
@@ -235,7 +224,7 @@
             <div>
                 <div class="input-label">
                     <span>Satılacak Miktar</span>
-                    @* Kullanıcı buna tıklarsa tüm parası kutuya dolar *@
+
                     <span class="balance-info" onclick="hepsiniSec()" title="Tümünü seçmek için tıkla">
                         Mevcut: @sahipOlunan.ToString("N4")
                     </span>
@@ -267,6 +256,7 @@
                 <div id="hata-mesaji" style="color: #ef4444; font-size: 0.8rem; margin-top: 5px; min-height: 1.2rem;"></div>
             </div>
 
+            <!--özet kısımı-->
             <div class="summary-box">
                 <span class="summary-label">Hesabına Geçecek Tutar</span>
                 <span class="summary-value" id="toplam">0,00 ₺</span>
@@ -294,14 +284,13 @@
 
         let girilenMiktar = parseFloat(miktarDegeri);
 
-        // 1. KONTROL: Geçersiz veya Negatif sayı
+        // Geçersiz veya Negatif sayı
         if (isNaN(girilenMiktar) || girilenMiktar < 0) {
             toplamText.innerText = "0,00 ₺";
             return;
         }
 
-        // 2. KONTROL: Bakiye Yeterli mi?
-        // JS tarafında küçük bir tolerans (0.000001) bırakılabilir float hataları için
+        // Bakiye Yeterli mi?
         if (girilenMiktar > sahipOlunanMiktar) {
             hataMesaji.innerText = "Yetersiz Bakiye! En fazla " + sahipOlunanMiktar + " satabilirsiniz.";
             hataMesaji.style.fontWeight = "bold";
