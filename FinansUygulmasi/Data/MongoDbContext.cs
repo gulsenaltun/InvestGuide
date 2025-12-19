@@ -19,7 +19,7 @@ namespace FinansUygulmasi.Data
         }
 
         // SQL'deki "DbSet" yerine burada "IMongoCollection" kullanıyoruz
-        public IMongoCollection<ForumKonu> Tartismalar => _database.GetCollection<ForumKonu>("Tartismalar");
+        public IMongoCollection<ForumKonu> Tartismalar => _database.GetCollection<ForumKonu>("comments");
 
         // İleride başka tablolar eklemek istersen buraya ekleyeceksin:
         // public IMongoCollection<LogKaydi> Loglar => _database.GetCollection<LogKaydi>("Loglar");

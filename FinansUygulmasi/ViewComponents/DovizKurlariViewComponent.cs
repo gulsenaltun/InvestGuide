@@ -1,43 +1,66 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using System.Linq;
-using Microsoft.EntityFrameworkCore; // ToListAsync için gerekli
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using FinansUygulmasi.Data;
 using FinansUygulmasi.Models.ViewModels;
-using FinansUygulmasi.Services;
+using Finans.GrpcServer; // gRPC namespace'i
 
-namespace FinansUygulmasi.ViewComponenet
+namespace FinansUygulmasi.ViewComponents // Namespace adına dikkat et, klasör adınla aynı olmalı
 {
-    public class DovizKurlariViewComponent: ViewComponent
+    public class DovizKurlariViewComponent : ViewComponent
     {
         private readonly ApplicationDbContext _context;
+        private readonly MarketPricer.MarketPricerClient _priceClient; // gRPC Müşterisi
 
-        public DovizKurlariViewComponent(ApplicationDbContext context)
+        // Constructor'da hem veritabanını hem gRPC servisini çağırıyoruz
+        public DovizKurlariViewComponent(ApplicationDbContext context, MarketPricer.MarketPricerClient priceClient)
         {
             _context = context;
+            _priceClient = priceClient;
         }
 
         public async Task<IViewComponentResult> InvokeAsync()
         { 
+            // 1. Veritabanından gösterilecek varlıkları çek
             var dbAssets = await _context.Assets
-                                        .Where (x=>x.Symbol=="GOLD"||x.Symbol == "GA" || x.Symbol == "USD" || x.Symbol == "EUR" || x.Symbol == "BTC")
+                                        .Where(x => x.Symbol == "GOLD" || x.Symbol == "GA" || x.Symbol == "XAU" || 
+                                                    x.Symbol == "USD" || x.Symbol == "EUR" || x.Symbol == "BTC")
                                         .ToListAsync();
-
-            var canliFiyatlar = MarketDataService.GetTumVeriler();
 
             var sonucListesi = new List<MarketDetailViewModel>();
 
             foreach (var asset in dbAssets)
             {
-                var fiyatVerisi = canliFiyatlar.FirstOrDefault(x => x.Symbol == asset.Symbol);
+                // 2. Her varlık için gRPC servisine sor: "Fiyatın kaç?"
+                decimal guncelFiyat = 0;
+                try
+                {
+                    // Altın sembol karmaşasını burada da çözelim
+                    string arananSembol = asset.Symbol;
+                    if (asset.Symbol == "GA" || asset.Symbol == "GOLD") arananSembol = "XAU";
+
+                    var request = new PriceRequest { Symbol = arananSembol };
+                    var response = _priceClient.GetCurrentPrice(request);
+                    
+                    if (response.IsSuccess)
+                    {
+                        guncelFiyat = (decimal)response.Price;
+                    }
+                }
+                catch
+                {
+                    // Servise ulaşılamazsa 0 kalır
+                    guncelFiyat = 0;
+                }
 
                 sonucListesi.Add(new MarketDetailViewModel
                 {
                     Symbol = asset.Symbol,
-                    Name = asset.Name, // Veritabanındaki isim (Örn: Amerikan Doları)
-                    CurrentPrice = fiyatVerisi != null ? fiyatVerisi.CurrentPrice : 0, // Servisten gelen fiyat
-                    IconClass = IkonGetir(asset.Symbol) // Aşağıdaki metoddan ikon al
+                    Name = asset.Name,
+                    CurrentPrice = guncelFiyat, // Artık canlı fiyat!
+                    IconClass = IkonGetir(asset.Symbol)
                 });
             }
 
@@ -51,10 +74,11 @@ namespace FinansUygulmasi.ViewComponenet
                 "USD" => "fa-solid fa-dollar-sign",
                 "EUR" => "fa-solid fa-euro-sign",
                 "BTC" => "fa-brands fa-bitcoin",
+                "GOLD" => "fa-solid fa-coins",
+                "GA" => "fa-solid fa-coins",
+                "XAU" => "fa-solid fa-coins",
                 _ => "fa-solid fa-coins"
             };
         }
-        
-            
     }
 }

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option csharp_namespace = "Finans.GrpcServer";
+
+package market;
+
+service MarketPricer {
+  rpc GetCurrentPrice (PriceRequest) returns (PriceResponse);
+}
+
+message PriceRequest {
+  string symbol = 1;
+}
+
+message PriceResponse {
+  string symbol = 1;
+  double price = 2;
+  bool isSuccess = 3;
+}
