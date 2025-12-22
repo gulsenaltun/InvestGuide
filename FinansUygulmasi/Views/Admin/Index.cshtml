@@ -169,7 +169,7 @@
 <div class="admin-container">
 
     <div class="admin-header">
-        <h2 class="gradient-title">👑 Yönetici Paneli</h2>
+        <h2 class="gradient-title">Yönetici Paneli</h2>
 
         @if (ViewBag.MarketDurumu == "Açık")
         {
@@ -187,7 +187,7 @@
             <h1>@ViewBag.ToplamKullanici</h1>
         </div>
         <div class="stat-card">
-            <h3>📊 Piyasa Durumu</h3>
+            <h3>Piyasa Durumu</h3>
             <h1>@ViewBag.MarketDurumu</h1>
         </div>
     </div>
@@ -248,9 +248,7 @@
 
                             @if (user.Role != "admin")
                             {
-                                @Html.ActionLink("Sil", "KullaniciSil", "Admin",
-                                         new { id = user.UserId },
-                                         new { @class = "action-delete", onclick = "return confirm('Bu üyeyi silmek istediğine emin misin?')" })
+                                @Html.ActionLink("Sil", "KullaniciSil", "Admin", new { id = user.UserId }, new { @class = "action-delete", onclick = "return confirm('Bu üyeyi silmek istediğine emin misin?')" })
                             }
                         </td>
                     </tr>

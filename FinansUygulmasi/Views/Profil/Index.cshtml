@@ -319,8 +319,31 @@
                                 <tr>
                                     <td>
                                         <div class="coin-flex">
+                                            @{
+                                                
+                                                string iconClass = "fa-question"; 
+                                                string iconPrefix = "fas"; // Varsayılan Solid (Dolar, Euro, Altın için)
+
+                                                if (item.Symbol == "BTC") 
+                                                { 
+                                                    iconPrefix = "fab"; // Sadece Bitcoin için Brands kütüphanesi
+                                                    iconClass = "fa-bitcoin"; 
+                                                }
+                                                else if (item.Symbol == "GA" || item.Symbol == "XAU" || item.Symbol == "GOLD") 
+                                                { 
+                                                    iconClass = "fa-coins"; 
+                                                }
+                                                else if (item.Symbol == "USD") 
+                                                { 
+                                                    iconClass = "fa-dollar-sign"; 
+                                                }
+                                                else if (item.Symbol == "EUR") 
+                                                { 
+                                                    iconClass = "fa-euro-sign"; 
+                                                }
+                                            }
                                             <div class="coin-icon" style="background-color: @item.RenkKod">
-                                                <i class="fas @(item.Symbol=="BTC"?"fa-bitcoin":item.Symbol=="GOLD"?"fa-coins":item.Symbol=="USD"?"fa-dollar-sign":"fa-euro-sign")"></i>
+                                                <i class="@iconPrefix @iconClass"></i>
                                             </div>
                                             <div class="coin-info">
                                                 <span class="coin-symbol">@item.Symbol</span>

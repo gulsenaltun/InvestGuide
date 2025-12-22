@@ -3,16 +3,17 @@ using FinansUygulmasi.Data;
 using FinansUygulmasi.Models;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Driver;
-using System.Net.Http; // 1. YENİ: HTTP istekleri için gerekli
-using System.Threading.Tasks; // 2. YENİ: Asenkron işlemler için gerekli
+using MongoDB.Driver; // 1. Ekleme: MongoDB komutları için gerekli
 
 namespace FinansUygulmasi.Controllers
 {
     public class HomeController : Controller
     {
+        // 2. Ekleme: Veritabanı bağlantı değişkenini tanımlıyoruz
         private readonly MongoDbContext _mongoContext;
 
+        // 3. Ekleme: Constructor (Yapıcı Metot)
+        // Program çalıştığında bu Controller, MongoDbContext'i talep eder.
         public HomeController(MongoDbContext mongoContext)
         {
             _mongoContext = mongoContext;
@@ -20,6 +21,7 @@ namespace FinansUygulmasi.Controllers
 
         public IActionResult Index(string? gelenMail)
         {
+            // --- A. Kullanıcı Adı Kısmı ---
             if (string.IsNullOrEmpty(gelenMail))
             {
                 ViewBag.Kullanici = "Değerli Üye";
@@ -28,48 +30,53 @@ namespace FinansUygulmasi.Controllers
             {
                 ViewBag.Kullanici = gelenMail;
             }
-            
+
+            // --- B. Veritabanı Kısmı (DÜZELTİLEN KISIM) ---
+            // AsQueryable() kullanarak işlemi standart C# sorgusuna çeviriyoruz.
+            // Bu sayede .ToList() hatası ortadan kalkar.
             var konular = _mongoContext.Tartismalar
                                        .AsQueryable()
-                                       .OrderByDescending(x => x.CreatedAt)
+                                       .OrderByDescending(x => x.CreatedAt) // SortBy yerine OrderByDescending
                                        .ToList();
 
             return View(konular);
         }
 
         [HttpPost]
-        public IActionResult IslemYap(int miktar, string tur, string sembol) 
+        public IActionResult IslemYap(int miktar, string tur, string sembol) // Sizin metodunuzun adı neyse
         {
-            // Marketin açık olup olmamasını kontrol et
+            // 1. GÜVENLİK KONTROLÜ: Market Kapalıysa İşlemi Durdur
             if (AdminController.MarketErisimiAcik == false)
             {
-                TempData["Hata"] = "⛔ Market kapalı olduğu için işlem gerçekleştirilemedi.";
+                // İsterseniz burada da ContentResult döndürebilirsiniz ama
+                // Kullanıcıyı ana sayfada tutup uyarı vermek daha şıktır.
+                TempData["Hata"] = "? Market kapalı olduğu için işlem gerçekleştirilemedi.";
                 return RedirectToAction("Index");
             }
+
+            // ... Sizin mevcut bakiye düşme / coin ekleme kodlarınız ...
 
             return RedirectToAction("Index");
         }
 
-        // --- 3. YENİ: YAPAY ZEKA TAHMİN METODU (Node.js Köprüsü) ---
         [HttpGet]
         public async Task<IActionResult> GetYapayZekaTahmini(string symbol, string currentPrice)
         {
-            // 1. Gelen fiyat verisindeki virgülü noktaya çevir (URL uyumu için)
-            // Örn: "34,18" -> "34.18"
+            // Gelen fiyat verisindeki virgülü noktaya çevir (URL uyumu için)
             if (string.IsNullOrEmpty(currentPrice)) currentPrice = "0";
             string formattedPrice = currentPrice.Replace(",", ".");
-            
-            // 2. Node.js servisine istek atacak URL (Docker veya Localhost port 3000)
+
+            // Node.js servisine istek atacak URL (Docker veya Localhost port 3000)
             string apiUrl = $"http://localhost:3000/api/predict?symbol={symbol}&currentPrice={formattedPrice}";
 
             using (var client = new HttpClient())
             {
                 try
                 {
-                    // 3. Node.js'ten cevabı bekle (Asenkron)
+                    // Node.js'ten cevabı bekle (Asenkron)
                     var responseString = await client.GetStringAsync(apiUrl);
-                    
-                    // 4. Gelen JSON verisini direkt olarak JavaScript'e gönder
+
+                    //  Gelen JSON verisini direkt olarak JavaScript'e gönder
                     return Content(responseString, "application/json");
                 }
                 catch (System.Exception ex)

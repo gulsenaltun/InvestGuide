@@ -1,0 +1,4 @@
+﻿<%@ ServiceHost 
+    Language="C#" 
+    Debug="true" 
+    Service="PasswordRecovery.WCF.AuthService" %>

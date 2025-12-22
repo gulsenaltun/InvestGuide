@@ -33,4 +33,6 @@ namespace FinansUygulmasi.Models.ViewModels
 
         public string RenkKod { get; set; }     
     }
+
+    
 }

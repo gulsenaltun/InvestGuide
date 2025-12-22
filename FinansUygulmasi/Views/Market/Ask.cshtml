@@ -1,83 +1,14 @@
-﻿@model FinansUygulmasi.Models.ViewModels.TahminViewModel
-
-@{
-    ViewData["Title"] = "Yapay Zeka Tahmini";
+﻿@{
     Layout = "_Layout";
-    
-    // Yön Hesapla (Yükseliş mi Düşüş mü?)
-    bool yukselis = Model.PredictedPrice > Model.CurrentPrice;
-    string yonRenk = yukselis ? "#4ade80" : "#f87171"; // Yeşil veya Kırmızı
-    string yonIcon = yukselis ? "fa-arrow-trend-up" : "fa-arrow-trend-down";
-    string yonMetin = yukselis ? "YÜKSELİŞ BEKLENTİSİ" : "DÜŞÜŞ BEKLENTİSİ";
-    
-    // Sembol İkonu
-    string symbolIcon = Model.Symbol switch {
-        "BTC" => "fa-brands fa-bitcoin",
-        "USD" => "fa-solid fa-dollar-sign",
-        "EUR" => "fa-solid fa-euro-sign",
-        _ => "fa-solid fa-coins"
-    };
+    ViewData["Title"] = ViewBag.Symbol + " Analizi";
 }
 
-<div class="container mt-5" style="max-width: 600px;">
-    
-    <div class="card border-0 shadow-lg" style="background-color: #1e1e2d; color: white; border-radius: 20px;">
-        
-        <div class="card-header text-center border-0 pt-4" style="background: transparent;">
-            <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
-                <i class="@symbolIcon" style="font-size: 30px; color: #c084fc;"></i>
-            </div>
-            <h3 class="mt-3 font-weight-bold">@Model.Symbol Analizi</h3>
-            <p class="text-muted">Yapay Zeka Destekli Piyasa Tahmini</p>
-        </div>
+<div style="padding: 4rem 1rem; min-height: 85vh; display: flex; align-items: center; justify-content: center;">
 
-        <div class="card-body text-center p-4">
-            
-            @if (Model.IsSuccess)
-            {
-                <div class="p-4 mb-4" style="background: rgba(255,255,255,0.05); border-radius: 15px; border: 1px solid rgba(255,255,255,0.1);">
-                    <span class="d-block text-muted text-uppercase mb-2" style="font-size: 0.8rem; letter-spacing: 1px;">24 Saatlik Hedef Fiyat</span>
-                    <h1 class="display-4 font-weight-bold mb-0">@Model.PredictedPrice.ToString("N2") ₺</h1>
-                    
-                    <div class="mt-3 py-2 px-4 d-inline-block" style="background: @(yukselis ? "rgba(74, 222, 128, 0.2)" : "rgba(248, 113, 113, 0.2)"); border-radius: 30px;">
-                        <span style="color: @yonRenk; font-weight: bold; font-size: 0.9rem;">
-                            <i class="fa-solid @yonIcon"></i> @yonMetin
-                        </span>
-                    </div>
-                </div>
+    @await Component.InvokeAsync("MarketDetail", new
+        {
+            symbol = (string)ViewBag.Symbol,
+            sablon = "Prediction"
+        })
 
-                <div class="row text-left mt-4">
-                    <div class="col-6">
-                        <small class="text-muted">Şu Anki Fiyat</small>
-                        <h5 class="font-weight-bold">@Model.CurrentPrice.ToString("N2") ₺</h5>
-                    </div>
-                    <div class="col-6 text-end">
-                        <small class="text-muted">Model Güven Skoru</small>
-                        <h5 class="font-weight-bold" style="color: #c084fc;">%85</h5>
-                    </div>
-                </div>
-
-                <div class="progress mt-2" style="height: 6px; background-color: #3f3f5f;">
-                    <div class="progress-bar" role="progressbar" style="width: 85%; background-color: #c084fc;"></div>
-                </div>
-                
-                <p class="mt-3 text-muted" style="font-size: 0.8rem;">
-                    <i class="fa-regular fa-clock"></i> Tahmin Tarihi: @Model.Date
-                </p>
-            }
-            else
-            {
-                <div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.1); border: none; color: #fca5a5;">
-                    <i class="fa-solid fa-triangle-exclamation"></i> @Model.Message
-                </div>
-            }
-
-            <div class="mt-4">
-                <a href="/" class="btn btn-outline-light px-4" style="border-radius: 20px;">
-                    <i class="fa-solid fa-arrow-left"></i> Piyasaya Dön
-                </a>
-            </div>
-
-        </div>
-    </div>
 </div>

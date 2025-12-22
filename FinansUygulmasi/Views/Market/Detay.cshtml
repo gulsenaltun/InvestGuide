@@ -1,5 +1,7 @@
+@model FinansUygulmasi.Models.ViewModels.MarketDetailViewModel
+
 @{
 	Layout = "_Layout";
 }
 
-@await Component.InvokeAsync("MarketDetail", new { symbol = "USD" })
+@await Component.InvokeAsync("MarketDetail", new { symbol = Model.Symbol })

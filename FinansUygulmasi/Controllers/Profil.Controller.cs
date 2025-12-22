@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http; // Session işlemleri için şart
+using Microsoft.AspNetCore.Http;
 using System.Linq;
 using FinansUygulmasi.Data;
 using FinansUygulmasi.Models.ViewModels;
 using FinansUygulmasi.Services;
 using FinansUygulmasi.Models.Entities;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinansUygulmasi.Controllers
 {
@@ -17,69 +18,93 @@ namespace FinansUygulmasi.Controllers
         {
             _context = context;
         }
-
         public IActionResult Index()
         {
             var userEmail = HttpContext.Session.GetString("UserEmail");
 
-            if (string.IsNullOrEmpty(userEmail))
-            {
-                return RedirectToAction("Giris", "Acilis");
-            }
-
-            // kullanıcı bulma (Session'daki e-posta ile)
-            var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
-            if (user == null)
+            var balanceInfo = _context.UserBalances.FirstOrDefault(b => b.email == userEmail);
+    
+            if (balanceInfo == null)
             {
                 HttpContext.Session.Clear();
                 return RedirectToAction("Giris", "Acilis");
             }
 
-            // cüzdan bilgikeri
-            var wallet = _context.Wallets.FirstOrDefault(w => w.UserId == user.UserId);
-            decimal nakitBakiye = wallet != null ? wallet.Balance : 0;
+            // Kullanıcı adını vb. hala ana Users tablosundan çekebiliriz
+            var user = _context.Users.FirstOrDefault(u => u.Email == userEmail);
 
-            // MODELİ DOLDUR
             var profilModel = new ProfilViewModel
             {
-                UserId = user.UserId, 
-                Username = user.Username,
-                Email = user.Email,
-                Role = user.Role,
-                CreatedAt = user.CreatedAt,
-                NakitBakiye = nakitBakiye
+                UserId = balanceInfo.user_id, 
+                Username = user?.Username ?? "Kullanıcı",
+                Email = balanceInfo.email,
+                NakitBakiye = balanceInfo.balance // View'dan gelen sade TL miktarı
             };
+            // --- VIEW KULLANIMI 2: Portföy Detayları ---
+            // UserAssets ve Assets tablolarını manuel birleştirmek yerine vw_PortfolioDetails kullanıyoruz.
+            // Bu View içinde asset_id, symbol ve amount gibi alanlar mevcuttur.
+            var portfolioData = _context.PortfolioDetails
+                .Where(p => p.user_id == balanceInfo.user_id)
+                .ToList();
 
-            //varlık hesaplama
-            var userAssets = _context.UserAssets.Where(ua => ua.UserId == user.UserId).ToList();
-            var allAssets = _context.Assets.ToList();
             var piyasaVerileri = MarketDataService.GetTumVeriler();
-
             var varliklarim = new List<VarlikDetay>();
 
-            foreach (var ua in userAssets)
+            foreach (var item in portfolioData)
             {
-                var assetInfo = allAssets.FirstOrDefault(a => a.AssetId == ua.AssetId);
-                if (assetInfo != null && ua.Amount > 0)
-                {
-                    var guncelVeri = piyasaVerileri.FirstOrDefault(p => p.Symbol == assetInfo.Symbol);
+                // View'dan gelen amount verisini kontrol ediyoruz
+                if (item.amount > 0)
+                {   
+                    string searchSymbol = item.symbol;
+                    if (searchSymbol == "XAU") searchSymbol = "GOLD";
+
+                    var guncelVeri = piyasaVerileri.FirstOrDefault(p => p.Symbol == searchSymbol);
                     decimal guncelFiyat = guncelVeri != null ? guncelVeri.CurrentPrice : 0;
+
+                    decimal karZarar = 0;
+                    decimal karZararOrani = 0;
+
+                    // Kar/Zarar Fonksiyonu: Parametreler doğrudan View'dan (item) besleniyor
+                    if (item.symbol == "USD" || item.symbol == "EUR")
+                    {
+                        var result = _context.Database
+                            .SqlQueryRaw<decimal>("SELECT fn_CalculatePotentialProfit({0}, {1}, {2})", 
+                                item.amount, //
+                                item.average_cost, //
+                                guncelFiyat)
+                            .ToList();
+
+                        karZarar = result.FirstOrDefault();
+
+                        if (item.average_cost > 0)
+                        {
+                            karZararOrani = ((guncelFiyat - item.average_cost) / item.average_cost) * 100;
+                        }
+                    }
+
+                    // Platform Toplam Miktar Fonksiyonu
+                    var platformToplamMiktar = _context.Database
+                        .SqlQueryRaw<decimal>("SELECT fn_GetTotalAssetAmount({0})", item.asset_id)
+                        .ToList()
+                        .FirstOrDefault();
 
                     varliklarim.Add(new VarlikDetay
                     {
-                        Symbol = assetInfo.Symbol,
-                        Name = assetInfo.Name,
-                        Miktar = ua.Amount,
+                        Symbol = item.symbol,
+                        Name = item.name,
+                        Miktar = item.amount, //
+                        OrtalamaMaliyet = item.average_cost, //
                         GuncelFiyat = guncelFiyat,
-                        ToplamDeger = ua.Amount * guncelFiyat,
-                        RenkKod = RenkGetir(assetInfo.Symbol)
+                        ToplamDeger = item.amount * guncelFiyat,
+                        KarZarar = karZarar,
+                        KarZararOrani = karZararOrani,
+                        RenkKod = RenkGetir(item.symbol)
                     });
                 }
             }
 
             decimal toplamVarlikDegeri = varliklarim.Sum(v => v.ToplamDeger);
 
-            // Yüzde hesaplama
             foreach (var v in varliklarim)
             {
                 v.Yuzde = toplamVarlikDegeri > 0 ? (v.ToplamDeger / toplamVarlikDegeri) * 100 : 0;
@@ -87,7 +112,7 @@ namespace FinansUygulmasi.Controllers
 
             profilModel.Varliklar = varliklarim;
             profilModel.ToplamVarlikDegeri = toplamVarlikDegeri;
-            profilModel.GenelToplam = nakitBakiye + toplamVarlikDegeri;
+            profilModel.GenelToplam = profilModel.NakitBakiye + toplamVarlikDegeri;
 
             return View(profilModel);
         }
@@ -97,6 +122,7 @@ namespace FinansUygulmasi.Controllers
             return symbol switch
             {
                 "GOLD" => "#facc15",
+                "XAU" => "#facc15",
                 "GA" => "#facc15",
                 "USD" => "#4ade80",
                 "EUR" => "#60a5fa",

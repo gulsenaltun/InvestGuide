@@ -155,19 +155,24 @@
 <body>
 
     <nav class="navbar">
-        @Html.ActionLink("🤖 Yatırım Rehberi", "Index", "Home", null, new { @class = "nav-logo" })
+        @Html.ActionLink("Yatırım Rehberi", "Index", "Home", null, new { @class = "nav-logo" })
 
-        <div class="nav-menu">
-            @Html.ActionLink("💬 Sohbet", "Index", "Forum", null, new { @class = "nav-link-custom" })
-            @Html.ActionLink("🟡 Altın", "Altin", "Market", null, new { @class = "nav-link-custom", style = "color:#ffd700" })
-            @Html.ActionLink("💵 Dolar", "Dolar", "Market", null, new { @class = "nav-link-custom", style = "color:#2ecc71" })
-            @Html.ActionLink("💶 Euro", "Euro", "Market", null, new { @class = "nav-link-custom", style = "color:#3498db" })
-            @Html.ActionLink("₿ Bitcoin", "Bitcoin", "Market", null, new { @class = "nav-link-custom", style = "color:#f7931a" })
-        </div>
+<div class="nav-menu">
+    @* Sohbet Linki *@
+    @Html.ActionLink("💬 Sohbet", "Index", "Forum", null, new { @class = "nav-link-custom" })
 
+    @* Detay Sayfasına Yönlendiren Sembol Linkleri *@
+    @Html.ActionLink("🟡 Altın", "Detay", "Market", new { symbol = "XAU" }, new { @class = "nav-link-custom", style = "color:#ffd700" })
+
+    @Html.ActionLink("💵 Dolar", "Detay", "Market", new { symbol = "USD" }, new { @class = "nav-link-custom", style = "color:#2ecc71" })
+
+    @Html.ActionLink("💶 Euro", "Detay", "Market", new { symbol = "EUR" }, new { @class = "nav-link-custom", style = "color:#3498db" })
+
+    @Html.ActionLink("₿ Bitcoin", "Detay", "Market", new { symbol = "BTC" }, new { @class = "nav-link-custom", style = "color:#f7931a" })
+</div>
         <div class="nav-profile">
             @Html.ActionLink("👤 Profilim", "Index", "Profil", null, new { @class = "btn-profil" })
-            @Html.ActionLink("🚪 Çıkış", "Cikis", "Acilis", null, new { @class = "btn-cikis" })
+            @Html.ActionLink("Çıkış", "Cikis", "Acilis", null, new { @class = "btn-cikis" })
         </div>
     </nav>
 

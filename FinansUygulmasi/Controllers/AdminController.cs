@@ -58,27 +58,25 @@ namespace FinansUygulmasi.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
 
-            // İstatistikler
             ViewBag.ToplamKullanici = _sqlContext.Users.Count();
             ViewBag.MarketDurumu = MarketErisimiAcik ? "Açık" : "Kapalı";
 
-            // Kullanıcı Listesi Sorgusu
-            var usersQuery = _sqlContext.Users.AsQueryable();
+            // 1. KULLANIM: SQL View ile Users tablosunu user_id üzerinden birleştiriyoruz
+            // Bu sayede hem sıralama (View'dan gelen) korunur hem de User modelini döndürebiliriz.
+            var usersQuery = from v in _sqlContext.UserList
+                            join u in _sqlContext.Users on v.user_id equals u.UserId
+                            select u; // Burası önemli! User entity'sini seçiyoruz.
 
-            // Eğer arama yapıldıysa filtrele
+            // 2. ARAMA: Filtreleme yapalım
             if (!string.IsNullOrEmpty(search))
             {
                 search = search.Trim();
                 usersQuery = usersQuery.Where(u => u.Username.Contains(search) || u.Email.Contains(search));
-
-                // Arama kutusunda yazı kalsın diye ViewBag'e atıyoruz
                 ViewBag.CurrentSearch = search;
             }
 
-            // Sonuçları listele (Arama yoksa son 10, varsa hepsi)
-            var userList = string.IsNullOrEmpty(search)
-                           ? usersQuery.OrderByDescending(u => u.UserId).Take(10).ToList()
-                           : usersQuery.ToList();
+            // 3. SONUÇ: View'a List<User> gönderiyoruz (Hata böylece çözülür)
+            var userList = usersQuery.ToList();
 
             return View(userList);
         }
@@ -120,56 +118,62 @@ namespace FinansUygulmasi.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpGet] 
-        public IActionResult Kullanicilar(string search)
+
+
+       [HttpGet] 
+public IActionResult Kullanicilar(string search)
+{
+    try 
+    {
+        // Önce Index sayfasının ihtiyaç duyduğu verileri garantiye alıyoruz
+        ViewBag.ToplamKullanici = _sqlContext.Users.Count();
+        ViewBag.MarketDurumu = MarketErisimiAcik ? "Açık" : "Kapalı";
+        ViewBag.CurrentSearch = search;
+
+        var users = _sqlContext.Users.AsQueryable();
+        if (!string.IsNullOrEmpty(search))
         {
-            if (!IsAdmin()) return RedirectToAction("Index", "Home");
-
-            var users = _sqlContext.Users.AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                // Gelen verinin başındaki/sonundaki boşlukları sil
-                search = search.Trim();
-
-                // Arama filtresini uygula
-                users = users.Where(u => u.Username.Contains(search) || u.Email.Contains(search));
-            }
-
-            //  Kullanıcının aradığı kelimeyi sayfaya geri gönder 
-            ViewBag.CurrentSearch = search;
-
-            return View(users.ToList());
+            search = search.Trim();
+            users = users.Where(u => u.Username.Contains(search) || u.Email.Contains(search));
         }
 
-        public IActionResult KullaniciSil(int id)
+        // BURASI KRİTİK: Eğer "Kullanicilar" diye bir sayfa yoksa, 
+        // doğrudan "Index" sayfasını aç diyoruz. Hata ihtimalini sıfırlıyoruz.
+        return View("Index", users.ToList());
+    }
+    catch (Exception)
+    {
+        // Ola ki veritabanı vs. bir hata olursa, patlamak yerine Index'e tazeleme yap
+        return RedirectToAction("Index");
+    }
+}
+
+public IActionResult KullaniciSil(int id)
+{
+    try
+    {
+        if (!IsAdmin()) return RedirectToAction("Index", "Home");
+
+        var user = _sqlContext.Users.Find(id);
+        if (user != null && user.Role != "admin")
         {
-            if (!IsAdmin()) return RedirectToAction("Index", "Home");
+            var kullaniciIslemleri = _sqlContext.Transactions.Where(x => x.UserId == id).ToList();
+            if (kullaniciIslemleri.Any()) _sqlContext.Transactions.RemoveRange(kullaniciIslemleri);
 
-            var user = _sqlContext.Users.Find(id);
-
-            if (user != null)
-            {
-                if (user.Role == "admin")
-                {
-                    TempData["Hata"] = "Yönetici hesabı silinemez!";
-                    return RedirectToAction("Kullanicilar");
-                }
-
-                var kullaniciIslemleri = _sqlContext.Transactions.Where(x => x.UserId == id).ToList();
-
-                if (kullaniciIslemleri.Any())
-                {
-                    _sqlContext.Transactions.RemoveRange(kullaniciIslemleri);
-                }
-
-                //kullanıcıyı sil
-                _sqlContext.Users.Remove(user);
-                _sqlContext.SaveChanges();
-            }
-
-            return RedirectToAction("Kullanicilar");
+            _sqlContext.Users.Remove(user);
+            _sqlContext.SaveChanges();
+            TempData["Mesaj"] = "Kullanıcı başarıyla silindi.";
         }
+    }
+    catch (Exception ex)
+    {
+        TempData["Hata"] = "Bir hata oluştu: " + ex.Message;
+    }
+
+    // Silme bittikten veya hata aldıktan sonra 
+    // ASLA "Kullanicilar"a gitme, hep çalışan "Index"e git.
+    return RedirectToAction("Index");
+}
 
         public IActionResult MarketDurumunuDegistir()
         {

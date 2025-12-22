@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using FinansUygulmasi.Data;
-using FinansUygulmasi.Models; // <-- DÜZELTME: Entities yerine Models kullanıldı
+using FinansUygulmasi.Models; 
 using FinansUygulmasi.Models.ViewModels;
 using Finans.GrpcServer; 
 using System.Net.Http;
@@ -26,86 +26,50 @@ namespace FinansUygulmasi.ViewComponents
 
         public async Task<IViewComponentResult> InvokeAsync(string symbol, string sablon = "Default")
         {
+            // Eğer ViewBag'den gelen sembol boşsa veya null ise varsayılan olarak BTC ata
+            if (string.IsNullOrEmpty(symbol)) symbol = "BTC"; 
+
             // 1. Veritabanından Varlığı Bul
             var asset = await _context.Assets.FirstOrDefaultAsync(x => x.Symbol == symbol);
-
-            // --- HATA KORUMASI ---
-            // Eğer veritabanında yoksa (Asset null ise) hata verme, geçici oluştur.
             if (asset == null)
             {
-                // DÜZELTME: Tam yol 'FinansUygulmasi.Models.Asset' olarak güncellendi
-                asset = new Asset 
-                {
-                    Symbol = symbol,
-                    Name = symbol switch
-                    {
-                        "USD" => "Amerikan Doları",
-                        "EUR" => "Euro",
-                        "BTC" => "Bitcoin",
-                        "XAU" => "Gram Altın",
-                        "GA" => "Gram Altın",
-                        "GOLD" => "Gram Altın",
-                        _ => symbol
-                    },
-                    Type = "Temp" // Senin Asset sınıfında 'Type' zorunlu olduğu için geçici bir değer atadım
-                };
+                asset = new Asset { Symbol = symbol, Name = symbol, Type = "Temp" };
             }
 
-            // Sembol Düzeltmesi
             string apiSymbol = (symbol == "GA" || symbol == "GOLD") ? "XAU" : symbol;
 
-            // 2. CANLI FİYAT ÇEK (gRPC)
+            // 2. CANLI FİYAT ÇEK
             decimal currentPrice = 0;
-            try
-            {
-                var request = new PriceRequest { Symbol = apiSymbol };
-                var response = _priceClient.GetCurrentPrice(request);
-                
+            try {
+                var response = await _priceClient.GetCurrentPriceAsync(new PriceRequest { Symbol = apiSymbol });
                 if (response.IsSuccess) currentPrice = (decimal)response.Price;
-            }
-            catch
-            {
-                currentPrice = 0;
-            }
+            } catch { currentPrice = 0; }
 
-            // Altın 0 geldiyse ve test yapıyorsak güvenlik değeri
             if (currentPrice == 0 && apiSymbol == "XAU") currentPrice = 2950;
 
-            // 3. YAPAY ZEKA TAHMİNİ ÇEK (Node.js)
+            // 3. YAPAY ZEKA TAHMİNİ
             decimal predictedPrice = 0;
-            string aiComment = "Analiz bekleniyor...";
+            string aiComment = "Analiz yapılıyor...";
             int confidence = 0;
             string predictionDirection = "Nötr";
 
-            string priceStr = currentPrice.ToString(CultureInfo.InvariantCulture);
-            string apiUrl = $"http://localhost:3000/api/predict?symbol={apiSymbol}&currentPrice={priceStr}";
-
-            using (var client = new HttpClient())
-            {
-                try
-                {
-                    var responseString = await client.GetStringAsync(apiUrl);
+            using (var client = new HttpClient()) {
+                try {
+                    string priceStr = currentPrice.ToString(CultureInfo.InvariantCulture);
+                    var responseString = await client.GetStringAsync($"http://localhost:3000/api/predict?symbol={apiSymbol}&currentPrice={priceStr}");
                     dynamic json = JsonConvert.DeserializeObject(responseString);
 
-                    if (json.success == true)
-                    {
+                    if (json != null && json.success == true) {
                         predictedPrice = (decimal)json.predicted_price;
                         aiComment = (string)json.message;
-                        
-                        bool isUp = predictedPrice > currentPrice;
-                        predictionDirection = isUp ? "Yükseliş" : "Düşüş";
-                        confidence = 85; 
+                        predictionDirection = predictedPrice > currentPrice ? "Yukselis" : "Dusus";
+                        confidence = 85;
                     }
-                }
-                catch
-                {
-                    aiComment = "AI Servisine Bağlanılamadı";
-                }
+                } catch { aiComment = "Yapay Zeka Servisi Çevrimdışı"; }
             }
 
-            // 4. MODELİ DOLDUR VE VIEW'A GÖNDER
-            var model = new MarketDetailViewModel
-            {
+            // 4. MODELİ DOLDUR
+            var model = new MarketDetailViewModel {
                 Symbol = asset.Symbol,
                 Name = asset.Name,
                 CurrentPrice = currentPrice,
@@ -115,9 +79,7 @@ namespace FinansUygulmasi.ViewComponents
                 PredictionDirection = predictionDirection,
                 ConfidenceScore = confidence,
                 AIComment = aiComment,
-                ChangeRate = currentPrice > 0 
-                    ? ((predictedPrice - currentPrice) / currentPrice) * 100 
-                    : 0
+                ChangeRate = currentPrice > 0 ? ((predictedPrice - currentPrice) / currentPrice) * 100 : 0
             };
 
             return View(sablon, model);
